@@ -56,8 +56,9 @@ router.route('/users')
       models.User.findOne({ where: {email: deserialized.email} })
             console.log("teste") 
   }).then(function(user) {
-          if (user !== null) {
-              console.log("usuario não esta nulo!")
+          
+          if (user != null && user !== undefined) {
+              console.log(user)
               if (user.isEmailVerified) {
                 console.log("verificou email") 
                 var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Esse email já está em uso", "email")
@@ -72,7 +73,8 @@ router.route('/users')
                 })
               }
             }
-            
+                          console.log("antes de salvar")
+
             var newUser = new User(deserialized)
             newUser.save().then(function(err) {
               errorHelper.errorHandler(err,req,res)

@@ -7,19 +7,19 @@ module.exports = {
             'Users',
             'isEmailVerified',{
                 type: Sequelize.BOOLEAN,
-                defaultValu : false,
+                defaultValue : false,
                 allowNull: false
             }
         ),
         queryInterface.addColumn(
           'Users',
           'authtoken',{
-            type: Sequelize.String
+            type: Sequelize.STRING
         }),
         queryInterface.addColumn(
           'Users',
           'name',{
-            type: Sequelize.String
+            type: Sequelize.STRING
         }),
         queryInterface.addColumn(
           'Users',
@@ -29,7 +29,8 @@ module.exports = {
         queryInterface.addColumn(
           'Users',
           'accessLevel',{
-            type:Sequelize.INTEGER
+            type:Sequelize.INTEGER,
+            defaultValue: 0
         })
       ];
   },
