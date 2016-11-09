@@ -2,17 +2,17 @@
 function databaseHost() {
   switch (process.env.NODE_ENV) {
     case 'development':
-    return  ""
+    return "postgres://dngxnvag:T0CcjdouoecdX9olDsGjL7GWPohQNtrd@elmer.db.elephantsql.com:5432/dngxnvag"
     case 'staging':
-    return ""
+    return "postgres://dngxnvag:T0CcjdouoecdX9olDsGjL7GWPohQNtrd@elmer.db.elephantsql.com:5432/dngxnvag"
     case 'production':
-    return ""
+    return "postgres://nxaarjth:Gyo4uR58bIpriRwQ4udFw-mCdZLv9Zwh@elmer.db.elephantsql.com:5432/nxaarjth"
     case 'test':
-    return ""
+    return "postgres://dngxnvag:T0CcjdouoecdX9olDsGjL7GWPohQNtrd@elmer.db.elephantsql.com:5432/dngxnvag"
     default :
     return ''
   }
-  return process.env.NODE_ENV
+
 }
 
 function serverProtocolAndHost() {

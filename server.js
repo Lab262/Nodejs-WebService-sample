@@ -29,9 +29,9 @@ app.use(function(req, res, next){
 
 var isUserPostRoute = ((req.path.indexOf('users') > -1 && req.method === 'POST') || req.path.indexOf('auth') > -1)
 
-  if (!isUserPostRoute) {
-    jwtHelper.verifyJsonWebToken(req,res,next,app)
-  }
+  // if (!isUserPostRoute) {
+  //   jwtHelper.verifyJsonWebToken(req,res,next,app)
+  // }
   next()
 })
 

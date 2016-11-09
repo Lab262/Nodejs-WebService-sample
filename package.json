@@ -10,6 +10,10 @@
     "test-unit": "istanbul cover _mocha test -- -R spec"
   },
   "dependencies": {
+    "pg": "4.x",
+    "ejs": "2.3.3",
+    "express": "4.13.3",
+    "cool-ascii-faces": "1.3.3",
     "bcrypt": "^0.8.7",
     "body-parser": "1.15.2",
     "cors": "^2.8.1",
