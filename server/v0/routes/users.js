@@ -1,11 +1,11 @@
 var User = require('../../models/v0/user')
 var express = require('express')
 var router = express.Router()
-var Environment = require('../../config/environment')
+var Environment = require('../../../config/environment')
 var Jwt = require('jsonwebtoken')
-var Mailer = require('../../lib/mailer')
-var errorHelper= require('../../lib/error-handler')
-var objectSerializer = require('../../lib/object-serializer')
+var Mailer = require('../../../lib/mailer')
+var errorHelper= require('../../../lib/error-handler')
+var objectSerializer = require('../../../lib/object-serializer')
 
 router.route('/users')
 

@@ -1,0 +1,35 @@
+{
+  "development": {
+    "username": "dngxnvag",
+    "password": "bA7XBf6epIcI6GI8ZgpTgh4IHlhfa4hF",
+    "database": "dngxnvag",
+    "port": "5432",
+    "host": "elmer-02.db.elephantsql.com",
+    "dialect": "postgres"
+  },
+  "staging": {
+    "username": "dngxnvag",
+    "password": "bA7XBf6epIcI6GI8ZgpTgh4IHlhfa4hF",
+    "database": "dngxnvag",
+    "port": "5432",
+    "host": "elmer-02.db.elephantsql.com",
+    "dialect": "postgres"
+  },
+  "test": {
+    "username": "ghbzgcqa",
+    "password": "hSJzOyZ2-T4NGTTyRzAqN-6g0QsMmJIG",
+    "database": "ghbzgcqa",
+    "port": "5432",
+    "host": "elmer-02.db.elephantsql.com",
+    "dialect": "postgres"
+    
+  },
+  "production": {
+    "username": "nxaarjth",
+    "password": "Gyo4uR58bIpriRwQ4udFw-mCdZLv9Zwh",
+    "database": "nxaarjth",
+    "port": "5432",
+    "host": "elmer-02.db.elephantsql.com",
+    "dialect": "postgres"
+  }
+}

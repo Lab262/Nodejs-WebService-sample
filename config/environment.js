@@ -1,20 +1,4 @@
 
-function databaseHost() {
-  switch (process.env.NODE_ENV) {
-    case 'development':
-    return "postgres://dngxnvag:T0CcjdouoecdX9olDsGjL7GWPohQNtrd@elmer.db.elephantsql.com:5432/dngxnvag"
-    case 'staging':
-    return "postgres://dngxnvag:T0CcjdouoecdX9olDsGjL7GWPohQNtrd@elmer.db.elephantsql.com:5432/dngxnvag"
-    case 'production':
-    return "postgres://nxaarjth:Gyo4uR58bIpriRwQ4udFw-mCdZLv9Zwh@elmer.db.elephantsql.com:5432/nxaarjth"
-    case 'test':
-    return "postgres://dngxnvag:T0CcjdouoecdX9olDsGjL7GWPohQNtrd@elmer.db.elephantsql.com:5432/dngxnvag"
-    default :
-    return ''
-  }
-
-}
-
 function serverProtocolAndHost() {
   switch (process.env.NODE_ENV) {
     case 'development':
@@ -43,9 +27,6 @@ function serverProtocolAndHost() {
 module.exports = {
 
   'secret': ',9@4gk8+nYw,3EL2{Law7vzFZE46Ni&An=(88bY/Rpno$vnLbY',
-  database: {
-    host: databaseHost()
-  },
   email: {
     username: "ohmyboxlab@gmail.com",
     password: "lab262$$$",

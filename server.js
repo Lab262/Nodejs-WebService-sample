@@ -19,8 +19,8 @@ app.use(bodyParser.raw({ type: 'application/vnd.api+json' }))
 var cors = require('cors')
 app.use(cors());
 
-var db = require('./config/db')
-db.setupDatabase()
+// var db = require('./config/db')
+// db.setupDatabase()
 
 app.set('superSecret', environment.secret)  // secret variable
 
