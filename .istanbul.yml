@@ -1,0 +1,7 @@
+instrumentation:
+    root: .
+    extensions:
+        - .js
+    default-excludes: true
+    include-all-sources: true
+    excludes: [/**node_modules**/]
