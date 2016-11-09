@@ -1,5 +1,5 @@
 {
-  "name": "node-api",
+  "name": "ohmybox-api",
   "main": "server.js",
   "engines": {
     "node": "6.5.0",
