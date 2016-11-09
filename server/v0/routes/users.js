@@ -51,81 +51,49 @@ router.route('/users')
 })
 
 .post(function(req,res) {
+    
+    var deserializedUser = null
 
     objectSerializer.deserializeJSONAPIDataIntoObject(req.body).then(function(deserialized) {
+      
       models.User.findOne({ where: {email: deserialized.email} })
-            console.log("teste") 
+      deserializedUser = deserialized
   }).then(function(user) {
-          
-          if (user != null && user !== undefined) {
-              console.log(user)
-              if (user.isEmailVerified) {
-                console.log("verificou email") 
-                var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Esse email já está em uso", "email")
+          // console.log(user)
+          // if (user != null && user !== undefined) {
+          //     console.log("user já existe")
+          //     if (user.isEmailVerified) {
+          //       console.log("verificou email") 
+          //       var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Esse email já está em uso", "email")
               
-                return res.status(403).json(error)
-              } else {
-                  console.log("passou antes do destroy") 
-                  User.destroy({ where: {email:deserialized.email } }).then(function(){
-                        errorHelper.errorHandler(err,req,res)
-                      console.log(arguments) 
-                      console.log("passou destroy") 
-                })
-              }
-            }
-                          console.log("antes de salvar")
+          //       return res.status(403).json(error)
+          //     } else {
+          //         console.log("passou antes do destroy") 
+          //         User.destroy({ where: {email:deserialized.email } }).then(function(){
+          //               errorHelper.errorHandler(err,req,res)
+          //             console.log(arguments) 
+          //             console.log("passou destroy") 
+          //       })
+          //     }
+          //   }
+          
 
-            var newUser = new User(deserialized)
-            newUser.save().then(function(err) {
-              errorHelper.errorHandler(err,req,res)
-               var tokenData = {
-                  email: newUser.email,
-                  id: newUser._id
-                }
-              console.log("entrou no salvar")
-            })
+        return models.User.build(deserializedUser).save()
            
+    }).then(function(newUser) {
+            var tokenData = {
+                  email: newUser.email,
+                  id:newUser
+            }
            var token = Jwt.sign(tokenData,Environment.secret)
-
            Mailer.sentMailVerificationLink(newUser,token)
-
            var serialized = objectSerializer.serializeObjectIntoJSONAPI(newUser)
+           return res.json({message: 'Por favor, confirme seu email clicando no link em seu email:' + newUser.email , user: serialized, token: token})
 
-           return res.send({message: 'Por favor, confirme seu email clicando no link em seu email:' + newUser.email , user: serialized, token: token})
-    }).then(function(err) {
-      var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
-      return res.status(403).json(error)
+    }).catch(function(err) {
+        var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
+        return res.status(403).json(error)
     })
-  
-  
-
-  //           if (user !== null) {
-  //             if (user.isEmailVerified) {
-  //               var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Esse email já está em uso", "email")
-  //               return res.status(403).json(error)
-  //             } else {
-  //               User.remove({email: deserialized.email}, function (err) {
-  //                 errorHelper.errorHandler(err,req,res)
-  //               })
-  //             }
-  //           }
-  //           var newUser = new User(deserialized)
-  //           newUser.save(function(err) {
-  //             errorHelper.errorHandler(err,req,res)
-  //             var tokenData = {
-  //               email: newUser.email,
-  //               id: newUser._id
-  //             }
-
-  //          var token = Jwt.sign(tokenData,Environment.secret)
-
-  //          Mailer.sentMailVerificationLink(newUser,token)
-
-  //          var serialized = objectSerializer.serializeObjectIntoJSONAPI(newUser)
-
-  //          return res.send({message: 'Por favor, confirme seu email clicando no link em seu email:' + newUser.email , user: serialized, token: token})
-  //      })
-  //   })
 
 })
 

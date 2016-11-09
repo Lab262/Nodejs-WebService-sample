@@ -30,7 +30,7 @@ module.exports = {
   email: {
     username: "ohmyboxlab@gmail.com",
     password: "lab262$$$",
-    accountName: "Oh! my box",
+    accountName: "Mybox",
     verifyEmailUrl: "api/v0/auth/verifyEmail",
     forgotPasswordConfirmedUrl: "api/v0/auth/forgotPasswordConfirmed"
 
