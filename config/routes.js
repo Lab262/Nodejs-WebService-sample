@@ -12,7 +12,7 @@ exports.setupRoutesAndVersions = function(app) {
       for (var currentRouteIndex in ROUTES) {
         if (ROUTES.hasOwnProperty(currentRouteIndex)) {
 
-        app.use('/api' + VERSIONS[versionIndex], require('../routes' + VERSIONS[versionIndex] + ROUTES[currentRouteIndex]))
+        app.use('/api' + VERSIONS[versionIndex], require('../server' + VERSIONS[versionIndex] + "/routes" + ROUTES[currentRouteIndex]))
       }
     }
   }
