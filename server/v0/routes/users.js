@@ -54,19 +54,42 @@ router.route('/users')
 
     objectSerializer.deserializeJSONAPIDataIntoObject(req.body).then(function(deserialized) {
       models.User.findOne({ where: {email: deserialized.email} })
-    
+            console.log("teste") 
   }).then(function(user) {
           if (user !== null) {
+              console.log("usuario não esta nulo!")
               if (user.isEmailVerified) {
+                console.log("verificou email") 
                 var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Esse email já está em uso", "email")
+              
                 return res.status(403).json(error)
               } else {
-                User.remove({email: deserialized.email}, function (err) {
-                  errorHelper.errorHandler(err,req,res)
+                  console.log("passou antes do destroy") 
+                  User.destroy({ where: {email:deserialized.email } }).then(function(){
+                        errorHelper.errorHandler(err,req,res)
+                      console.log(arguments) 
+                      console.log("passou destroy") 
                 })
               }
             }
+            
+            var newUser = new User(deserialized)
+            newUser.save().then(function(err) {
+              errorHelper.errorHandler(err,req,res)
+               var tokenData = {
+                  email: newUser.email,
+                  id: newUser._id
+                }
+              console.log("entrou no salvar")
+            })
+           
+           var token = Jwt.sign(tokenData,Environment.secret)
 
+           Mailer.sentMailVerificationLink(newUser,token)
+
+           var serialized = objectSerializer.serializeObjectIntoJSONAPI(newUser)
+
+           return res.send({message: 'Por favor, confirme seu email clicando no link em seu email:' + newUser.email , user: serialized, token: token})
     }).then(function(err) {
       var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
       return res.status(403).json(error)
