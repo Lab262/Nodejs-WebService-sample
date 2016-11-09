@@ -4,7 +4,7 @@ module.exports = {
   up: function (queryInterface, Sequelize) {
       return [
         queryInterface.addColumn(
-            'users',
+            'Users',
             'isEmailVerified',{
                 type: Sequelize.BOOLEAN,
                 defaultValu : false,
@@ -12,22 +12,22 @@ module.exports = {
             }
         ),
         queryInterface.addColumn(
-          'users',
+          'Users',
           'authtoken',{
             type: Sequelize.String
         }),
         queryInterface.addColumn(
-          'users',
+          'Users',
           'name',{
             type: Sequelize.String
         }),
         queryInterface.addColumn(
-          'users',
+          'Users',
           'gender',{
             type:Sequelize.INTEGER
         }),
         queryInterface.addColumn(
-          'users',
+          'Users',
           'accessLevel',{
             type:Sequelize.INTEGER
         })
@@ -35,10 +35,10 @@ module.exports = {
   },
 
   down: function (queryInterface, Sequelize) {
-      queryInterface.removeColumn('users', 'isEmailVerified'),
-      queryInterface.removeColumn('users', 'authtoken'),
-      queryInterface.removeColumn('users', 'name'),
-      queryInterface.removeColumn('users', 'gender'),
-      queryInterface.removeColumn('users', 'accessLevel')
+      queryInterface.removeColumn('Users', 'isEmailVerified'),
+      queryInterface.removeColumn('Users', 'authtoken'),
+      queryInterface.removeColumn('Users', 'name'),
+      queryInterface.removeColumn('Users', 'gender'),
+      queryInterface.removeColumn('Users', 'accessLevel')
   }
 };
