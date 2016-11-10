@@ -7,6 +7,21 @@ var errorHelper= require('../../../lib/error-handler')
 var objectSerializer = require('../../../lib/object-serializer')
 var models = require('../models/index');
 
+/** * @swagger
+ * definition:
+ *   User:
+ *     properties:
+ *       id:
+ *         type: integer
+ *       email:
+ *         type: string
+ *       password:
+ *         type: string
+ *       authToken:
+ *         type: string
+ */
+
+
 router.route('/users')
 
 .get(function(req,res) {
@@ -57,32 +72,23 @@ router.route('/users')
  *   post:
  *     tags:
  *       - Users
- *     description: Creates a new user
- *     produces:
- *       - application/json
+ *     description: Create new user
  *     parameters:
- *       - name: email
- *         description: User email
- *         in: body
- *         required: true
- *         schema:
- *           $ref: '#/definitions/User'
- *       - name: password
- *         description: User password
- *         in: body
- *         required: true
- *         schema:
- *           $ref: '#/definitions/User'
- *       - name: name
- *         description: User name
- *         in: body
- *         required: false
- *         schema:
- *           $ref: '#/definitions/User'
- *        
+*       - name: email
+*         description: user valid email
+*         in: formData
+*         required: true
+*         type: string
+*       - name: password
+*         description: user  password
+*         in: formData
+*         required: true
+*         type: string
  *     responses:
  *       200:
- *         description: Successfully created
+ *         description: Por favor, confirme seu email clicando no link em seu email
+ *       403:
+ *         description: Por favor, confirme seu email clicando no link em seu email
  */
 .post(function(req,res) {
     

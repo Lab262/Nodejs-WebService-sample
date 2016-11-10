@@ -6,6 +6,7 @@
     "npm": "3.10.3"
   },
   "scripts": {
+    "start": "nodemon server.js",
     "test": "npm run test-unit",
     "test-unit": "istanbul cover _mocha test -- -R spec"
   },

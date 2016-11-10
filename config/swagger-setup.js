@@ -2,7 +2,7 @@
 
 var environment = require('./environment') 
 
-exports.setupSwagger = function (app) {
+exports.setupSwagger = function (app, express) {
     
     var swaggerJSDoc = require('swagger-jsdoc');
     // swagger definition
@@ -12,7 +12,7 @@ exports.setupSwagger = function (app) {
             version: '1.0.0',
             description: 'OhMyBox '
         },
-        host: environment.server.protocol + environment.server.host,
+        host: environment.server.host,
         basePath: '/'
     };
     // options for the swagger docs
@@ -26,8 +26,13 @@ exports.setupSwagger = function (app) {
     var swaggerSpec = swaggerJSDoc(options);
 
     app.get('/swagger.json', function (req, res) {
-        res.setHeader('Content-Type', 'application/json');
+        // res.setHeader('Content-Type', 'application/json');
         res.send(swaggerSpec);
     });
+
+    var path = require('path')
+    app.set('views', path.join('./', 'views'));
+    app.set('view engine', 'jade');
+    app.use(express.static(path.join( './', 'public')));
 
 }
