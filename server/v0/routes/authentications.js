@@ -15,7 +15,7 @@ var models = require('../models/index');
  * /api/v0/auth/login:
  *   post:
  *     tags:
- *       - Users
+ *      - Auth
  *     description: Login User 
  *     parameters:
 *       - name: email
@@ -45,6 +45,8 @@ router.route('/auth/login')
 
   })
 
+
+
 router.route('/auth/adminLogin')
   .post(function (req, res) {
 
@@ -60,6 +62,27 @@ router.route('/auth/adminLogin')
 
   })
 
+/**
+ * @swagger
+ * /api/v0/auth/verifyEmail/{token}:
+ *   get:
+ *     tags:
+ *       - Auth
+ *     description: Verication email
+ *     parameters:
+*       - name: token
+*         description: email verification token 
+*         in: path 
+*         required: true
+*         type: string
+ *     responses:
+ *       200:
+ *         description: User object
+ *       403:
+ *         description: email or password is wrong 
+ *       422:
+ *         description: User not found 
+ */
 router.route('/auth/verifyEmail/:token')
   .get(function (req, res) {
 
