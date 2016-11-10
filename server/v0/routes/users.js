@@ -75,16 +75,14 @@ router.route('/users')
            where: { email: user.email}}).then(function() {
            })
       }
-    } else {
-      
     }
-
+    
       return models.User.build(deserializedUser).save()
            
     }).then(function(newUser) {
             var tokenData = {
                   email: newUser.email,
-                  id:newUser
+                  id:newUser.id
             }
            var token = Jwt.sign(tokenData,Environment.secret)
            Mailer.sentMailVerificationLink(newUser,token)
