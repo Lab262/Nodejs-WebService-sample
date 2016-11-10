@@ -42,6 +42,9 @@ app.use(morgan('dev'))
 var routesSetup = require('./config/routes')
 routesSetup.setupRoutesAndVersions(app)
 
+var swaggerSetup = require('./config/swagger-setup')
+swaggerSetup.setupSwagger(app)  
+
 module.exports = app
 
 //Service setup
