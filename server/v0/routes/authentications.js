@@ -12,7 +12,6 @@ var models = require('../models/index');
 router.route('/auth/login')
   .post(function (req, res) {
 
-
     verifyUserAndConfirmMailVerification(req, res, function (user) {
       authenticateUser(req, res, user)
     })
@@ -233,39 +232,44 @@ router.route('/auth/facebook')
 
 function verifyUserAndConfirmMailVerification(req, res, callbackAfterVerification) {
 
-  // User.findOne({ email: req.body.email }, function(err,user) {
-  //   errorHelper.errorHandler(err,req,res)
+  models.User.findOne({ where: { email: req.body.email } }).then(function (user) {
+    if (!user) {
+      var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Falha na autenticação. Usuário não encontrado.", "email")
+      return res.status(422).json(error)
+    }
 
-  //   if(!user){
-  //     var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Falha na autenticação. Usuário não encontrado.", "email")
-  //     return res.status(422).json(error)
-  //   }
-
-  //   if(!user.isEmailVerified) {
-  //     var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Seu email ainda não foi verificado, por favor verifique seu email para continuar", "email")
-  //     return res.status(403).json(error)
-  //   } else {
-  //     callbackAfterVerification(user)
-  //   }
-  // })
+    if (!user.isEmailVerified) {
+      var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Seu email ainda não foi verificado, por favor verifique seu email para continuar", "email")
+      return res.status(403).json(error)
+    } else {
+      callbackAfterVerification(user)
+    }
+  }).catch(function (err) {
+    var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(err)
+    return res.status(403).json(error)
+  })
 
 }
 
 function authenticateUser(req, res, user) {
-
+ 
   JwtHelper.comparePassword(req.body.password, user.password, function (err, isMatch) {
     if (err) {
+      
       var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Falha na autenticação: senha Incorreta", "password")
       return res.status(422).json(error)
-    } if (isMatch) {
 
+    } if (isMatch) {
+  
       var result = {
-        token: Jwt.sign(user.tokenData, Environment.secret),
+        token: Jwt.sign(user.getTokenData(), Environment.secret),
         user: user
       }
+      
 
       return res.json(result)
     } else {
+      
       var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Falha na autenticação: senha Incorreta", "password")
       return res.status(422).json(error)
     }
