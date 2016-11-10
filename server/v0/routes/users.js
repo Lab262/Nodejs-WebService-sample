@@ -50,6 +50,40 @@ router.route('/users')
 
 })
 
+
+/**
+ * @swagger
+ * /api/v0/users:
+ *   post:
+ *     tags:
+ *       - Users
+ *     description: Creates a new user
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: email
+ *         description: User email
+ *         in: body
+ *         required: true
+ *         schema:
+ *           $ref: '#/definitions/User'
+ *       - name: password
+ *         description: User password
+ *         in: body
+ *         required: true
+ *         schema:
+ *           $ref: '#/definitions/User'
+ *       - name: name
+ *         description: User name
+ *         in: body
+ *         required: false
+ *         schema:
+ *           $ref: '#/definitions/User'
+ *        
+ *     responses:
+ *       200:
+ *         description: Successfully created
+ */
 .post(function(req,res) {
     
     var deserializedUser = null
