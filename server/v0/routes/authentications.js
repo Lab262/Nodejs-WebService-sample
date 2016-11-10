@@ -9,6 +9,33 @@ var errorHelper = require('../../../lib/error-handler')
 var objectSerializer = require('../../../lib/object-serializer')
 var models = require('../models/index');
 
+
+/**
+ * @swagger
+ * /api/v0/auth/login:
+ *   post:
+ *     tags:
+ *       - Users
+ *     description: Login User 
+ *     parameters:
+*       - name: email
+*         description: email user
+*         in: formData
+*         required: true
+*         type: string
+*       - name: password
+*         description: user  password
+*         in: formData
+*         required: true
+*         type: string
+ *     responses:
+ *       200:
+ *         description: User object
+ *       403:
+ *         description: email or password is wrong 
+ *       422:
+ *         description: User not found 
+ */ 
 router.route('/auth/login')
   .post(function (req, res) {
 

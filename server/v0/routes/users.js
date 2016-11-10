@@ -7,20 +7,6 @@ var errorHelper= require('../../../lib/error-handler')
 var objectSerializer = require('../../../lib/object-serializer')
 var models = require('../models/index');
 
-/** * @swagger
- * definition:
- *   User:
- *     properties:
- *       id:
- *         type: integer
- *       email:
- *         type: string
- *       password:
- *         type: string
- *       authToken:
- *         type: string
- */
-
 
 router.route('/users')
 
