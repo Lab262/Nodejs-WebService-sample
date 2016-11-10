@@ -56,29 +56,30 @@ router.route('/users')
 
     objectSerializer.deserializeJSONAPIDataIntoObject(req.body).then(function(deserialized) {
       
-      models.User.findOne({ where: {email: deserialized.email} })
-      deserializedUser = deserialized
-  }).then(function(user) {
-          // console.log(user)
-          // if (user != null && user !== undefined) {
-          //     console.log("user já existe")
-          //     if (user.isEmailVerified) {
-          //       console.log("verificou email") 
-          //       var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Esse email já está em uso", "email")
-              
-          //       return res.status(403).json(error)
-          //     } else {
-          //         console.log("passou antes do destroy") 
-          //         User.destroy({ where: {email:deserialized.email } }).then(function(){
-          //               errorHelper.errorHandler(err,req,res)
-          //             console.log(arguments) 
-          //             console.log("passou destroy") 
-          //       })
-          //     }
-          //   }
-          
+    deserializedUser = deserialized
 
-        return models.User.build(deserializedUser).save()
+    return models.User.findOne({ where: {email: deserialized.email} })   
+      
+  }).then(function(user) {
+    
+    
+    if (user != null && user !== undefined) {
+      
+      if (user.isEmailVerified) {
+        
+        var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Email já está em uso", "email")
+        return res.status(403).json(error)
+
+      } else {
+        user.destroy({
+           where: { email: user.email}}).then(function() {
+           })
+      }
+    } else {
+      
+    }
+
+      return models.User.build(deserializedUser).save()
            
     }).then(function(newUser) {
             var tokenData = {
