@@ -35,29 +35,12 @@ var models = require('../models/index');
  *         description: email or password is wrong 
  *       422:
  *         description: User not found 
- */ 
+ */
 router.route('/auth/login')
   .post(function (req, res) {
 
     verifyUserAndConfirmMailVerification(req, res, function (user) {
       authenticateUser(req, res, user)
-    })
-
-  })
-
-
-
-router.route('/auth/adminLogin')
-  .post(function (req, res) {
-
-    verifyUserAndConfirmMailVerification(req, res, function (user) {
-      if (user.isAdmin) {
-        authenticateUser(req, res, user)
-      } else {
-        var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Esse login não e de um usuário administrador", "email")
-        return res.status(422).json(error)
-
-      }
     })
 
   })
@@ -119,111 +102,106 @@ router.route('/auth/verifyEmail/:token')
     })
   })
 
-
-router.route('/auth/resendVerificationEmailLink')
-  .post(function (req, res) {
-
-    // User.findOne({ email: req.body.email }, function(err,user) {
-    //   errorHelper.errorHandler(err,req,res)
-
-    //   if(!user){
-    //     var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Email não registrado", "email")
-    //     return res.status(422).json(error)
-    //   }
-
-    //   var token = Jwt.sign(user.tokenData,Environment.secret)
-    //   Mailer.sentMailVerificationLink(user,token)
-
-    //   return res.json({message:"Link de verificação de conta foi enviado para o seu email: " + user.email})
-    // });
-
-  })
+/**
+ * @swagger
+ * /api/v0/auth/forgotPassword:
+ *   post:
+ *     tags:
+ *      - Auth
+ *     description: Forgot Password 
+ *     parameters:
+*       - name: email
+*         description: email user
+*         in: formData
+*         required: true
+*         type: string
+ *     responses:
+ *       200:
+ *         description: User object
+ *       403:
+ *         description: email or password is wrong 
+ *       422:
+ *         description: User not found 
+ */
 
 router.route('/auth/forgotPassword')
   .post(function (req, res) {
 
-    // User.findOne({ email: req.body.email }, function(err, user){
-    //   if (!err) {
-    //     if (user === null){
-    //       var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Email não registrado", "email")
-    //       return res.status(422).json(error)
-    //     }
-    //     if (user.isEmailVerified === false) {
+    models.User.findOne({ where: { email: req.body.email } }).then(function (user) {
+      if (!user) {
+        var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Email não registrado", "email")
+        return res.status(422).json(error)
+      }
+      if (!user.isEmailVerified) {
+        var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Seu email ainda não foi verificado, por favor verifique seu email para continuar", "email")
+        return res.status(403).json(error)
+      } else {
 
-    //       var token = Jwt.sign(user.tokenData,Environment.secret)
-    //       Mailer.sentMailVerificationLink(user,token)
-    //       var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Seu email ainda não foi confirmado, por favor verifique seu email para continuar", "email")
-    //       return res.status(403).json(error)
-    //     } else {
+        var token = Jwt.sign(user.getTokenData(), Environment.secret)
 
-    //         var token = Jwt.sign(user.tokenData,Environment.secret)
-    //         Mailer.sentMailForgotPasswordLink(user, token)
+        Mailer.sentMailForgotPasswordLink(user, token)
 
-    //         return res.json({message: "A senha foi enviada para o email cadastrado: " + req.body.email})
-    //     }
-    //   }
-    // })
-
+        return res.json({ message: "A senha foi enviada para o email cadastrado: " + req.body.email })
+      }
+    }).catch(function (err) {
+      var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(err)
+      return res.status(403).json(error)
+    })
   })
 
+/**
+ * @swagger
+ * /api/v0/auth/forgotPasswordConfirmed/{token}:
+ *   get:
+ *     tags:
+ *       - Auth
+ *     description: Confirm forgot link.
+ *     parameters:
+*       - name: token
+*         description: email verification token 
+*         in: path 
+*         required: true
+*         type: string
+ *     responses:
+ *       200:
+ *         description: A nova senha foi enviada para o email.
+ *       403:
+ *         description: Link de renovação inválido. 
+ */
 router.route('/auth/forgotPasswordConfirmed/:token')
   .get(function (req, res) {
-
+    
     // return res.json(req.params.token)
-
+    var userObject = null
     Jwt.verify(req.params.token, Environment.secret, function (err, decoded) {
       if (decoded === undefined) {
         var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Link de verificação inválida.", "password")
         return res.status(403).json(error)
       }
 
-      // // User.findOne({ _id: decoded.id, email: decoded.email}, function(err, user){
-      // //   if (user === null){
-      // //     var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Link de renovação inválido.", "password")
-      // //     return res.status(403).json(error)
+      models.User.findOne({ where: { email: decoded.email } }).then(function (user) {
+        if (!user) {
+          var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Link de renovação inválido", "password")
+          return res.status(403).json(error)
+        }
 
-      // //   }
+        var random = PasswordGenerator(12, false)
+        user.password = random
+         userObject = user
 
-      // //   var random = PasswordGenerator(12, false)
-      // //   user.password = random
+        Mailer.sentNewCredentials(user, random)
 
-      // //   Mailer.sentNewCredentials(user,random)
+        return user.save()
+      }).then(function() {
 
-      // //   user.save(function(err) {
-      // //     if (err) {
-      // //       errorHelper.erorHandler(err,req,res)
-      // //     } else {
-      // //       return res.status(200).json({message: 'A nova senha foi enviada para o email '+ user.email})
-      // //     }
-      // //   })
+        return res.status(200).json({ message: 'A nova senha foi enviada para o email ' + userObject.email })
 
-      // })
+      }).catch(function (err) {
+        var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(err)
+        return res.status(403).json(error)
+      })
+
     })
-
-    // User.findOne({ email: req.body.email }, function(err, user){
-    //   if (!err) {
-    //     if (user === null){
-    //       var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Email não registrado", "email")
-    //       return res.status(422).json(error)
-    //     }
-    //     if (user.isEmailVerified === false) {
-    //
-    //       var token = Jwt.sign(user.tokenData,Environment.secret)
-    //       Mailer.sentMailVerificationLink(user,token)
-    //       var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Seu email ainda não foi confirmado, por favor verifique seu email para continuar", "email")
-    //       return res.status(403).json(error)
-    //     } else {
-    //
-    //       var token = Jwt.sign(user.tokenData,Environment.secret)
-    //       Mailer.sentMailVerificationLink(user,token)
-    //
-    //       user.save(function(err,user) {
-    //         Mailer.sentMailForgotPassword(user, random)
-    //         return res.json({message: "A senha foi enviada para o email cadastrado: " + req.body.email})
-    //       })
-    //     }
-    //   }
-    // })
 
   })
 
@@ -302,24 +280,24 @@ function verifyUserAndConfirmMailVerification(req, res, callbackAfterVerificatio
 }
 
 function authenticateUser(req, res, user) {
- 
+
   JwtHelper.comparePassword(req.body.password, user.password, function (err, isMatch) {
     if (err) {
-      
+
       var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Falha na autenticação: senha Incorreta", "password")
       return res.status(422).json(error)
 
     } if (isMatch) {
-  
+
       var result = {
         token: Jwt.sign(user.getTokenData(), Environment.secret),
         user: user
       }
-      
+
 
       return res.json(result)
     } else {
-      
+
       var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Falha na autenticação: senha Incorreta", "password")
       return res.status(422).json(error)
     }
