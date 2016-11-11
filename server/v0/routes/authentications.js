@@ -211,7 +211,7 @@ router.route('/auth/forgotPasswordConfirmed/:token')
  *   post:
  *     tags:
  *      - Auth
- *     description: Login Social Media User 
+ *     description: Login Social Media User.
  *     parameters:
 *       - name: email
 *         description: facebook email user
@@ -224,7 +224,7 @@ router.route('/auth/forgotPasswordConfirmed/:token')
 *         required: true
 *         type: string
 *       - name: socialMediaType
-*         description: social media id.
+*         description: social media type options are 0 = Facebook, 1 = Instagram, 2 = Gmail, 3 = Twitter.
 *         in: formData
 *         required: true
 *         type: string
@@ -235,12 +235,10 @@ router.route('/auth/forgotPasswordConfirmed/:token')
 *         type: string
  *     responses:
  *       200:
- *         description: User object
- *       403:
- *         description: email or password is wrong 
- *       422:
- *         description: User not found 
- */
+ *         description: successufully logged throught facebook with email.
+ *       423:
+ *         description: Falha na autenticação senha incorreta. 
+ */     
 
 router.route('/auth/facebook')
   .post(function (req, res) {
@@ -271,30 +269,28 @@ router.route('/auth/facebook')
       }
       foundUser = user
       
-      return user.getSocialMedia({ socialMediaType: req.body.socialMediaType }).then(function (socialMedia) {
+      return user.getSocialMedia( { where: { socialMediaType: req.body.socialMediaType }}).then(function (socialMedia) {
         
         if (socialMedia.length === 0) {
           
-          return user.createSocialMedia({
+         return models.SocialMedia.create({
             socialMediaId: req.body.socialMediaId,
             socialMediaType: req.body.socialMediaType,
-            password: req.body.password
-        })
-        // .then(function(newUseruser){
-             
-        //      var token = Jwt.sign(newUser.getTokenData(),Environment.secret)
-        //     return res.json({message: 'successufully create account throught facebook with email:' + newUser.email , user: newUser, token: token})
-        //   })
+            socialMediaPassword: req.body.password
+          }).then(function(socialMedia){
+
+            return foundUser.addSocialMedia(socialMedia)
+          })
         } else {
           
-          JwtHelper.comparePassword(req.body.password, foundUser.password, function (err, isMatch) {
+          JwtHelper.comparePassword(req.body.password, socialMedia[0].socialMediaPassword, function (err, isMatch) {
             if (err) {
               var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Falha na autenticação: senha incorreta", "password")
               return res.status(422).json(error)
             }
             if (isMatch) {
-              var token = Jwt.sign(user.getTokenData(), Environment.secret)
-              return res.json({ message: 'successufully logged throught facebook with email:' + foundUser.email, user: foundUser, token: token })
+              var token = Jwt.sign(foundUser.getTokenData(), Environment.secret)
+              return res.status(200).json({ message: 'successufully logged throught facebook with email:' + foundUser.email, user: foundUser, token: token })
             } else {
               var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Falha na autenticação: senha incorreta", "password")
               return res.status(422).json(error)
@@ -306,10 +302,10 @@ router.route('/auth/facebook')
 
     }).then(function (newUser) {
             var token = Jwt.sign(newUser.getTokenData(),Environment.secret)
-            return res.json({message: 'successufully create account throught facebook with email:' + newUser.email , user: newUser, token: token})
+            return res.status(200).json({message: 'successufully logged with account throught facebook with email:' + newUser.email , user: newUser, token: token})
     }).catch(function (err) {
-      console.log("ERRO:" + err)
-
+         var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Falha na autenticação: senha incorreta", "password")
+              return res.status(422).json(error)
     });
   })
 
