@@ -3452,7 +3452,6 @@ var SwaggerClient = module.exports = function (url, options) {
   this.deferredClient = undefined;
 
   this.clientAuthorizations = new auth.SwaggerAuthorizations();
-
   if (typeof url !== 'undefined') {
     return this.initialize(url, options);
   } else {
@@ -3463,14 +3462,14 @@ var SwaggerClient = module.exports = function (url, options) {
 SwaggerClient.prototype.initialize = function (url, options) {
   this.models = {};
   this.sampleModels = {};
-
+  
   if (typeof url === 'string') {
     this.url = url;
   } else if (_.isObject(url)) {
     options = url;
     this.url = options.url;
   }
-
+  
   if(this.url && this.url.indexOf('http:') === -1 && this.url.indexOf('https:') === -1) {
     // no protocol, so we can only use window if it exists
     if(typeof(window) !== 'undefined' && window && window.location) {
