@@ -238,7 +238,7 @@ router.route('/auth/forgotPasswordConfirmed/:token')
  *         description: successufully logged throught facebook with email.
  *       423:
  *         description: Falha na autenticação senha incorreta. 
- */     
+ */
 
 router.route('/auth/socialMedia')
   .post(function (req, res) {
@@ -268,21 +268,21 @@ router.route('/auth/socialMedia')
 
       }
       foundUser = user
-      
-      return user.getSocialMedia( { where: { socialMediaType: req.body.socialMediaType }}).then(function (socialMedia) {
-        
+
+      return user.getSocialMedia({ where: { socialMediaType: req.body.socialMediaType } }).then(function (socialMedia) {
+
         if (socialMedia.length === 0) {
-          
-         return models.SocialMedia.create({
+
+          return models.SocialMedia.create({
             socialMediaId: req.body.socialMediaId,
             socialMediaType: req.body.socialMediaType,
             socialMediaPassword: req.body.password
-          }).then(function(socialMedia){
+          }).then(function (socialMedia) {
 
             return foundUser.addSocialMedia(socialMedia)
           })
         } else {
-          
+
           JwtHelper.comparePassword(req.body.password, socialMedia[0].socialMediaPassword, function (err, isMatch) {
             if (err) {
               var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Falha na autenticação: senha incorreta", "password")
@@ -297,65 +297,17 @@ router.route('/auth/socialMedia')
             }
           })
         }
-        
+
       })
 
     }).then(function (newUser) {
-            var token = Jwt.sign(newUser.getTokenData(),Environment.secret)
-            return res.status(200).json({message: 'successufully logged with account throught facebook with email:' + newUser.email , user: newUser, token: token})
+      var token = Jwt.sign(newUser.getTokenData(), Environment.secret)
+      return res.status(200).json({ message: 'successufully logged with account throught facebook with email:' + newUser.email, user: newUser, token: token })
     }).catch(function (err) {
-         var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Falha na autenticação: senha incorreta", "password")
-              return res.status(422).json(error)
+      var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Falha na autenticação: senha incorreta", "password")
+      return res.status(422).json(error)
     });
   })
-
-
-// .then(function(user) {
-
-
-// User.findOne({ email : req.body.email }, function(err,user) {
-//   //CREATE USER AND LOGIN
-
-//   if (user === null) {
-//     //return res.json("USUARIO NAO EXISTE")
-
-//     var newUser = new User(req.body)
-//     newUser.isEmailVerified = true
-//     newUser.password = req.body.facebook.password
-//     newUser.save(function(err) {
-//       errorHelper.errorHandler(err,req,res)
-
-//       var token = Jwt.sign(newUser.tokenData,Environment.secret)
-
-//       return res.json({message: 'successufully create account throught facebook with email:' + newUser.email , user: newUser, token: token})
-//     })
-//   }else if (user.facebook === null || user.facebook.id === null) {
-//     user.facebook.id = req.body.facebook.id
-//     user.facebook.password = req.body.facebook.password
-//     user.save(function(err) {
-//       errorHelper.errorHandler(err,req,res)
-//       var token = Jwt.sign(user.tokenData,Environment.secret)
-
-//       return res.json({message: 'successufully associate account throught facebook with email:' + user.email , user: newUser, token: token})
-//     })
-//   } else {
-
-//     JwtHelper.comparePassword(req.body.facebook.password, user.password, function(err, isMatch) {
-//       if (err) {
-//         var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Falha na autenticação: senha incorreta", "password")
-//         return res.status(422).json(error)
-//       }
-//       if (isMatch) {
-//         var token = Jwt.sign(user.tokenData,Environment.secret)
-//         return res.json({message: 'successufully logged throught facebook with email:' + user.email , user: user, token: token})
-//       } else {
-//         var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Falha na autenticação: senha incorreta", "password")
-//         return res.status(422).json(error)
-//       }
-//     })
-//   }
-
-// })
 
 function verifyUserAndConfirmMailVerification(req, res, callbackAfterVerification) {
 

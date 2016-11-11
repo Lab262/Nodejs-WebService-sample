@@ -23,7 +23,6 @@ app.use(bodyParser.json({ type: 'application/*+json' }))
 var cors = require('cors')
 app.use(cors());
 
-
 var swaggerSetup = require('./config/swagger-setup')
 swaggerSetup.setupSwagger(app, express)  
 
