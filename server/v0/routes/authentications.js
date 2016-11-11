@@ -223,6 +223,11 @@ router.route('/auth/forgotPasswordConfirmed/:token')
 *         in: formData
 *         required: true
 *         type: string
+*       - name: socialMediaType
+*         description: social media id.
+*         in: formData
+*         required: true
+*         type: string
 *       - name: socialMediaId
 *         description: social media id.
 *         in: formData
@@ -240,48 +245,77 @@ router.route('/auth/forgotPasswordConfirmed/:token')
 router.route('/auth/facebook')
   .post(function (req, res) {
 
-    
-    if (req.body.email === null || req.body.password.password === null) {
+
+    if (req.body.email === null || req.body.password === null || req.body.password.indexOf(Environment.facebook.passwordSecret) < 0) {
       var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Invalid facebook password format", "facebook.password")
       return res.status(403).json(error)
-
     }
-    
-    models.User.findOne({ where: { email: req.body.email } }).then(function (user) {
-      // if (!user) {
-        // var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Usuário não ", "password")
-        //return res.status(403).json(error)
-       return models.User.create({ email: req.body.email })
-      // }
-      }).then(function(user) {
-          console.log("ENTROU NO NEW usER")
-          user.email = req.body.facebook.email
-          console.log("ENTROU NO NEW usER")
-          var socialMedia = SocialMedia.create({
-            userId: user.get('id'),
-            socialMediaPassword: req.body.facebook.password,
-            socialMediaType: 0
-          });
 
-          return socialMedia
+    var foundUser = null
+    models.User.findOne({ where: { email: req.body.email, isEmailVerified: true } }).then(function (user) {
+      if (!user) {
 
-        }).then(function (socialMedia) {
-          //socialMedia.getUser()
-          errorHelper.errorHandler(err, req, res)
-          var token = Jwt.sign(newUser.tokenData, Environment.secret)
+        return models.User.create({
+          email: req.body.email,
+          password: req.body.password,
+          isEmailVerified: true,
+          SocialMedia: [{
+            socialMediaPassword: req.body.password,
+            socialMediaType: req.body.socialMediaType,
+            socialMediaId: req.body.socialMediaId
+          }]
+        }, {
+            include: [models.SocialMedia]
+          })
 
-         // return res.json({ message: 'successufully create account throught facebook with email:' + newUser.email, user: newUser, token: token })
-        }).catch(function (err) {
-          console.log("ERRO:"+err)
+      }
+      foundUser = user
+      
+      return user.getSocialMedia({ socialMediaType: req.body.socialMediaType }).then(function (socialMedia) {
+        
+        if (socialMedia.length === 0) {
+          
+          return user.createSocialMedia({
+            socialMediaId: req.body.socialMediaId,
+            socialMediaType: req.body.socialMediaType,
+            password: req.body.password
+        })
+        // .then(function(newUseruser){
+             
+        //      var token = Jwt.sign(newUser.getTokenData(),Environment.secret)
+        //     return res.json({message: 'successufully create account throught facebook with email:' + newUser.email , user: newUser, token: token})
+        //   })
+        } else {
+          
+          JwtHelper.comparePassword(req.body.password, foundUser.password, function (err, isMatch) {
+            if (err) {
+              var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Falha na autenticação: senha incorreta", "password")
+              return res.status(422).json(error)
+            }
+            if (isMatch) {
+              var token = Jwt.sign(user.getTokenData(), Environment.secret)
+              return res.json({ message: 'successufully logged throught facebook with email:' + foundUser.email, user: foundUser, token: token })
+            } else {
+              var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Falha na autenticação: senha incorreta", "password")
+              return res.status(422).json(error)
+            }
+          })
+        }
+        
+      })
 
-      });
+    }).then(function (newUser) {
+            var token = Jwt.sign(newUser.getTokenData(),Environment.secret)
+            return res.json({message: 'successufully create account throught facebook with email:' + newUser.email , user: newUser, token: token})
+    }).catch(function (err) {
+      console.log("ERRO:" + err)
+
+    });
   })
-// var newUser = new User(req.body)
-// newUser.email = req.body.facebook.email
-// newUser.save
-// newUser.save = (function (err) {
 
-// }
+
+// .then(function(user) {
+
 
 // User.findOne({ email : req.body.email }, function(err,user) {
 //   //CREATE USER AND LOGIN
