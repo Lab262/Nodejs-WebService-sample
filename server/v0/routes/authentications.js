@@ -207,19 +207,19 @@ router.route('/auth/forgotPasswordConfirmed/:token')
 
 /**
  * @swagger
- * /api/v0/auth/facebook:
+ * /api/v0/auth/socialMedia:
  *   post:
  *     tags:
  *      - Auth
  *     description: Login Social Media User.
  *     parameters:
 *       - name: email
-*         description: facebook email user
+*         description: social media email user
 *         in: formData
 *         required: true
 *         type: string
 *       - name: password
-*         description: password secret with facebook id.
+*         description: password secret with social media id.
 *         in: formData
 *         required: true
 *         type: string
@@ -240,7 +240,7 @@ router.route('/auth/forgotPasswordConfirmed/:token')
  *         description: Falha na autenticação senha incorreta. 
  */     
 
-router.route('/auth/facebook')
+router.route('/auth/socialMedia')
   .post(function (req, res) {
 
 
