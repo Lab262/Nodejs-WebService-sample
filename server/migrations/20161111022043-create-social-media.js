@@ -12,9 +12,11 @@ module.exports = {
         type: Sequelize.STRING
       },
       socialMediaPassword: {
+        allowNull: false,
         type: Sequelize.STRING
       },
       UserId: {
+        allowNull: false,
         type: Sequelize.INTEGER
       },
       createdAt: {

@@ -170,7 +170,7 @@ router.route('/auth/forgotPassword')
  */
 router.route('/auth/forgotPasswordConfirmed/:token')
   .get(function (req, res) {
-    
+
     // return res.json(req.params.token)
     var userObject = null
     Jwt.verify(req.params.token, Environment.secret, function (err, decoded) {
@@ -187,12 +187,12 @@ router.route('/auth/forgotPasswordConfirmed/:token')
 
         var random = PasswordGenerator(12, false)
         user.password = random
-         userObject = user
+        userObject = user
 
         Mailer.sentNewCredentials(user, random)
 
         return user.save()
-      }).then(function() {
+      }).then(function () {
 
         return res.status(200).json({ message: 'A nova senha foi enviada para o email ' + userObject.email })
 
@@ -205,58 +205,127 @@ router.route('/auth/forgotPasswordConfirmed/:token')
 
   })
 
+/**
+ * @swagger
+ * /api/v0/auth/facebook:
+ *   post:
+ *     tags:
+ *      - Auth
+ *     description: Login Social Media User 
+ *     parameters:
+*       - name: email
+*         description: facebook email user
+*         in: formData
+*         required: true
+*         type: string
+*       - name: password
+*         description: password secret with facebook id.
+*         in: formData
+*         required: true
+*         type: string
+*       - name: socialMediaId
+*         description: social media id.
+*         in: formData
+*         required: true
+*         type: string
+ *     responses:
+ *       200:
+ *         description: User object
+ *       403:
+ *         description: email or password is wrong 
+ *       422:
+ *         description: User not found 
+ */
+
 router.route('/auth/facebook')
   .post(function (req, res) {
-    if (req.body.facebook === null || req.body.facebook.password === null || req.body.facebook.password.indexOf(Environment.facebook.passwordSecret) < 0) {
+
+    
+    if (req.body.email === null || req.body.password.password === null) {
       var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Invalid facebook password format", "facebook.password")
       return res.status(403).json(error)
 
     }
+    
+    models.User.findOne({ where: { email: req.body.email } }).then(function (user) {
+      // if (!user) {
+        // var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Usuário não ", "password")
+        //return res.status(403).json(error)
+       return models.User.create({ email: req.body.email })
+      // }
+      }).then(function(user) {
+          console.log("ENTROU NO NEW usER")
+          user.email = req.body.facebook.email
+          console.log("ENTROU NO NEW usER")
+          var socialMedia = SocialMedia.create({
+            userId: user.get('id'),
+            socialMediaPassword: req.body.facebook.password,
+            socialMediaType: 0
+          });
 
-    // User.findOne({ email : req.body.email }, function(err,user) {
-    //   //CREATE USER AND LOGIN
+          return socialMedia
 
-    //   if (user === null) {
-    //     //return res.json("USUARIO NAO EXISTE")
+        }).then(function (socialMedia) {
+          //socialMedia.getUser()
+          errorHelper.errorHandler(err, req, res)
+          var token = Jwt.sign(newUser.tokenData, Environment.secret)
 
-    //     var newUser = new User(req.body)
-    //     newUser.isEmailVerified = true
-    //     newUser.password = req.body.facebook.password
-    //     newUser.save(function(err) {
-    //       errorHelper.errorHandler(err,req,res)
+         // return res.json({ message: 'successufully create account throught facebook with email:' + newUser.email, user: newUser, token: token })
+        }).catch(function (err) {
+          console.log("ERRO:"+err)
 
-    //       var token = Jwt.sign(newUser.tokenData,Environment.secret)
-
-    //       return res.json({message: 'successufully create account throught facebook with email:' + newUser.email , user: newUser, token: token})
-    //     })
-    //   }else if (user.facebook === null || user.facebook.id === null) {
-    //     user.facebook.id = req.body.facebook.id
-    //     user.facebook.password = req.body.facebook.password
-    //     user.save(function(err) {
-    //       errorHelper.errorHandler(err,req,res)
-    //       var token = Jwt.sign(user.tokenData,Environment.secret)
-
-    //       return res.json({message: 'successufully associate account throught facebook with email:' + user.email , user: newUser, token: token})
-    //     })
-    //   } else {
-
-    //     JwtHelper.comparePassword(req.body.facebook.password, user.password, function(err, isMatch) {
-    //       if (err) {
-    //         var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Falha na autenticação: senha incorreta", "password")
-    //         return res.status(422).json(error)
-    //       }
-    //       if (isMatch) {
-    //         var token = Jwt.sign(user.tokenData,Environment.secret)
-    //         return res.json({message: 'successufully logged throught facebook with email:' + user.email , user: user, token: token})
-    //       } else {
-    //         var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Falha na autenticação: senha incorreta", "password")
-    //         return res.status(422).json(error)
-    //       }
-    //     })
-    //   }
-
-    // })
+      });
   })
+// var newUser = new User(req.body)
+// newUser.email = req.body.facebook.email
+// newUser.save
+// newUser.save = (function (err) {
+
+// }
+
+// User.findOne({ email : req.body.email }, function(err,user) {
+//   //CREATE USER AND LOGIN
+
+//   if (user === null) {
+//     //return res.json("USUARIO NAO EXISTE")
+
+//     var newUser = new User(req.body)
+//     newUser.isEmailVerified = true
+//     newUser.password = req.body.facebook.password
+//     newUser.save(function(err) {
+//       errorHelper.errorHandler(err,req,res)
+
+//       var token = Jwt.sign(newUser.tokenData,Environment.secret)
+
+//       return res.json({message: 'successufully create account throught facebook with email:' + newUser.email , user: newUser, token: token})
+//     })
+//   }else if (user.facebook === null || user.facebook.id === null) {
+//     user.facebook.id = req.body.facebook.id
+//     user.facebook.password = req.body.facebook.password
+//     user.save(function(err) {
+//       errorHelper.errorHandler(err,req,res)
+//       var token = Jwt.sign(user.tokenData,Environment.secret)
+
+//       return res.json({message: 'successufully associate account throught facebook with email:' + user.email , user: newUser, token: token})
+//     })
+//   } else {
+
+//     JwtHelper.comparePassword(req.body.facebook.password, user.password, function(err, isMatch) {
+//       if (err) {
+//         var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Falha na autenticação: senha incorreta", "password")
+//         return res.status(422).json(error)
+//       }
+//       if (isMatch) {
+//         var token = Jwt.sign(user.tokenData,Environment.secret)
+//         return res.json({message: 'successufully logged throught facebook with email:' + user.email , user: user, token: token})
+//       } else {
+//         var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Falha na autenticação: senha incorreta", "password")
+//         return res.status(422).json(error)
+//       }
+//     })
+//   }
+
+// })
 
 function verifyUserAndConfirmMailVerification(req, res, callbackAfterVerification) {
 
