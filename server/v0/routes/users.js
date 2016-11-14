@@ -70,6 +70,11 @@ router.route('/users')
   *         in: formData
   *         required: true
   *         type: string
+    *       - name: access level
+  *         description: access level type options are 0 = user, 1 = seller, 2 = admin.
+  *         in: formData
+  *         required: true
+  *         type: int
    *     responses:
    *       200:
    *         description: Por favor, confirme seu email clicando no link em seu email
@@ -106,7 +111,7 @@ router.route('/users')
       return models.User.build(deserializedUser).save()
 
     }).then(function (newUser) {
-      
+
       var tokenData = {
         email: newUser.email,
         id: newUser.id
@@ -117,7 +122,7 @@ router.route('/users')
       return res.json({ message: 'Por favor, confirme seu email clicando no link em seu email:' + newUser.email, user: serialized, token: token })
 
     }).catch(function (err) {
-      
+
       var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
       return res.status(403).json(error)
     })
@@ -150,14 +155,56 @@ router.route('/users/:id')
 
   })
 
+  /**
+   * @swagger
+   * /api/v0/users/{id}:
+   *   get:
+   *     tags:
+   *       - Users
+   *     description: get user by id
+   *     parameters:
+  *       - name: id
+  *         description: user valid id
+  *         in: path
+  *         required: true
+  *         type: string
+  *       - name: x-access-token
+  *         description: access token user
+  *         in: header
+  *         required: true
+  *         type: string
+   *     responses:
+   *       200:
+   *         description: User informations.
+   *       403:
+   *         description: User not found.
+   */
   .get(function (req, res) {
-    // User.findOne({ _id: req.params.id},function(err,user) {
-    //   errorHelper.errorHandler(err,req,res)
-    //   var serialized = objectSerializer.serializeObjectIntoJSONAPI(user)
 
-    //   return res.json(serialized)
-    // })
+    models.User.findOne({ where: { id: req.params.id } }).then(function (user) {
+
+      if (user) {
+        var serialized = objectSerializer.serializeObjectIntoJSONAPI(user)
+        return res.json(serialized)
+      } else {
+
+        return res.status(403).json("USER NOT FOUND")
+        // var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify("USER NOT FOUND"))
+        //return res.status(403).json(error)
+      }
+
+    }).catch(function (err) {
+
+      var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
+      return res.status(403).json(error)
+    })
   })
+  // User.findOne({ _id: req.params.id},function(err,user) {
+  //   errorHelper.errorHandler(err,req,res)
+  //   var serialized = objectSerializer.serializeObjectIntoJSONAPI(user)
+
+  //   return res.json(serialized)
+  // 
 
   .delete(function (req, res) {
     // User.remove({
