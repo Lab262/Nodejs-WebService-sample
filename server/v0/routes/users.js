@@ -70,7 +70,7 @@ router.route('/users')
   *         in: formData
   *         required: true
   *         type: string
-    *       - name: access level
+  *       - name: access level
   *         description: access level type options are 0 = user, 1 = seller, 2 = admin.
   *         in: formData
   *         required: true
@@ -129,30 +129,66 @@ router.route('/users')
 
   })
 
+ /**
+   * @swagger
+   * /api/v0/users/{id}:
+   *   patch:
+   *     tags:
+   *       - Users
+   *     description: get user and update by id
+   *     parameters:
+  *       - name: id
+  *         description: user valid id
+  *         in: path
+  *         required: true
+  *         type: string
+  *       - name: x-access-token
+  *         description: access token user
+  *         in: header
+  *         required: true
+  *         type: string
+  *       - name: email
+  *         description: user email
+  *         in: formData
+  *         required: false
+  *         type: string
+  *       - name: name
+  *         description: user name
+  *         in: formData
+  *         required: false
+  *         type: string
+  *       - name: gender
+  *         description: user gender
+  *         in: formData
+  *         required: false
+  *         type: string
+   *     responses:
+   *       200:
+   *         description: User successfully updated.
+   *       404:
+   *         description: User not found.
+   */
 router.route('/users/:id')
 
   .patch(function (req, res) {
 
-    // var callBack = function(deserialized) {
-    //   User.findOne(
-    //     {_id: req.params.id},
-    //     function(err,user) {
-    //       if(!user){
-    //         errorHelper.entityNotFoundError(req,res)
-    //       }
+    models.User.update(
+      objectSerializer.deserializerJSONAndCreateAUpdateClosure(req.body),
+      {
+        where: { id: req.params.id }
+      })
+      .then(function (result) {
 
-    //       var user =  objectSerializer.deserializerJSONIntoObject(user,deserialized)
-
-    //       user.save(function(err,user) {
-
-    //         return res.json({message: 'user successufully updated'})
-    //       })
-    //     })
-    // }
-
-    // objectSerializer.deserializeJSONAPIDataIntoObject(req.body,callBack)
-
-
+        if (result == 0) {
+          var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify("user not found."))
+          return res.status(404).json(error)
+        } else {
+          return res.status(200).json("User successfully updated")
+        }
+      }).catch(function (err) {
+        var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
+        return res.status(404).json(error)
+      })
   })
 
   /**
@@ -176,7 +212,7 @@ router.route('/users/:id')
    *     responses:
    *       200:
    *         description: User informations.
-   *       403:
+   *       404:
    *         description: User not found.
    */
   .get(function (req, res) {
@@ -187,16 +223,11 @@ router.route('/users/:id')
         var serialized = objectSerializer.serializeObjectIntoJSONAPI(user)
         return res.json(serialized)
       } else {
-
-        return res.status(403).json("USER NOT FOUND")
-        // var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify("USER NOT FOUND"))
-        //return res.status(403).json(error)
+        return res.status(404).json("USER NOT FOUND")
       }
-
     }).catch(function (err) {
-
       var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
-      return res.status(403).json(error)
+      return res.status(404).json(error)
     })
   })
   // User.findOne({ _id: req.params.id},function(err,user) {
