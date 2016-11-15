@@ -230,24 +230,48 @@ router.route('/users/:id')
       return res.status(404).json(error)
     })
   })
-  // User.findOne({ _id: req.params.id},function(err,user) {
-  //   errorHelper.errorHandler(err,req,res)
-  //   var serialized = objectSerializer.serializeObjectIntoJSONAPI(user)
 
-  //   return res.json(serialized)
-  // 
-
+  /**
+   * @swagger
+   * /api/v0/users/{id}:
+   *   delete:
+   *     tags:
+   *       - Users
+   *     description: delete user by id
+   *     parameters:
+  *       - name: id
+  *         description: user valid id
+  *         in: path
+  *         required: true
+  *         type: string
+  *       - name: x-access-token
+  *         description: access token user
+  *         in: header
+  *         required: true
+  *         type: string
+   *     responses:
+   *       200:
+   *         description: User successfully deleted.
+   *       404:
+   *         description: User not found.
+   */
   .delete(function (req, res) {
-    // User.remove({
-    //   _id: req.params.id
-    // },
-    // function(err) {
-    //   if (err) {
-    //     errorHelper.erorHandler(err,req,res)
-    //   } else {
-    //     return res.status(204).json({message: 'user successufully deleted'})
-    //   }
-    // })
+
+    models.User.destroy({
+    where: {
+        id: req.params.id
+    }}).then(function (result) {
+
+      if (result == 0) {
+        var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify("User not found."))
+        return res.status(404).json(error)
+      } else {
+        return res.status(200).json("User successfully deleted")
+      } 
+    }).catch(function (err) {
+      var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
+      return res.status(404).json(error)
+    })
   })
 
 module.exports = router
