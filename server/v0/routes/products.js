@@ -141,7 +141,7 @@ router.route('/products')
     *         required: true
     *         type: string
     *       - name: price
-    *         description: price product
+    *         description: price product, decimal separated by point "."
     *         in: formData
     *         required: true
     *         type: number
@@ -151,7 +151,7 @@ router.route('/products')
     *         required: true
     *         type: string
     *       - name: discount
-    *         description: discount of product
+    *         description: discount of product, decimal separated by point "."
     *         in: formData
     *         required: false
     *         type: number
@@ -182,9 +182,7 @@ router.route('/products')
        return models.Product.build(deserializedProduct).save().then(function (product) {
             var serialized = objectSerializer.serializeObjectIntoJSONAPI(product)
                 return res.status(200).json(product)
-
             }).catch(function (err) {
-
                 var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
                 return res.status(403).json(error)
             })
@@ -282,7 +280,7 @@ router.route('/products')
           *       404:
           *         description: User not found.
           */
-        router.route('/users/:id')
+        router.route('/products/:id')
 
             .patch(function (req, res) {
 
@@ -307,14 +305,14 @@ router.route('/products')
 
             /**
              * @swagger
-             * /api/v0/users/{id}:
+             * /api/v0/products/{id}:
              *   get:
              *     tags:
-             *       - Users
-             *     description: get user by id
+             *       - Products
+             *     description: get product by id
              *     parameters:
             *       - name: id
-            *         description: user valid id
+            *         description: product valid id
             *         in: path
             *         required: true
             *         type: string
@@ -325,19 +323,19 @@ router.route('/products')
             *         type: string
              *     responses:
              *       200:
-             *         description: User informations.
+             *         description: Product informations.
              *       404:
-             *         description: User not found.
+             *         description: Product not found.
              */
             .get(function (req, res) {
 
-                models.User.findOne({ where: { id: req.params.id } }).then(function (user) {
+                models.Product.findOne({ where: { id: req.params.id } }).then(function (product) {
 
-                    if (user) {
-                        var serialized = objectSerializer.serializeObjectIntoJSONAPI(user)
+                    if (product) {
+                        var serialized = objectSerializer.serializeObjectIntoJSONAPI(product)
                         return res.json(serialized)
                     } else {
-                        return res.status(404).json("USER NOT FOUND")
+                        return res.status(404).json("PRODUCT NOT FOUND")
                     }
                 }).catch(function (err) {
                     var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
