@@ -144,14 +144,14 @@ router.route('/brands')
 
 /**
   * @swagger
-  * /api/v0/products/{id}:
+  * /api/v0/brands/{id}:
   *   patch:
   *     tags:
-  *       - Products
-  *     description: get product and update by id
+  *       - Brands
+  *     description: get brand and update by id
   *     parameters:
  *       - name: id
- *         description: product valid id
+ *         description: brand valid id
  *         in: path
  *         required: true
  *         type: string
@@ -161,55 +161,58 @@ router.route('/brands')
  *         required: true
  *         type: string
  *       - name: name
- *         description: name product
+ *         description: name brand
  *         in: formData
  *         required: false
  *         type: string
  *       - name: description
- *         description: description product
+ *         description: description brand
  *         in: formData
  *         required: false
  *         type: string
- *       - name: price
- *         description: product price
- *         in: formData
- *         required: false
- *         type: number
- *       - name: discount
- *         description: product discount
- *         in: formData
- *         required: false
- *         type: number
- *       - name: amount
- *         description: product amount
+ *       - name: brandPhone
+ *         description: brand phone
  *         in: formData
  *         required: false
  *         type: integer
+ *       - name: discount
+ *         description: brand discount
+ *         in: formData
+ *         required: false
+ *         type: number
+ *       - name: email
+ *         description: brand email
+ *         in: formData
+ *         required: false
+ *         type: string
   *     responses:
   *       200:
-  *         description: Product successfully updated.
+  *         description: Brand successfully updated.
   *       404:
-  *         description: Product not found.
+  *         description: Brand not found.
   */
-router.route('/products/:id')
+router.route('/brands/:id')
 
     .patch(function (req, res) {
 
-        models.Product.update(
+        models.Brand.update(
             objectSerializer.deserializerJSONAndCreateAUpdateClosure(req.body),
             {
                 where: { id: req.params.id }
             })
             .then(function (result) {
-
+               
                 if (result == 0) {
-                    var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify("product not found."))
+                    var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify("brand not found."))
+                    console.log("RESULT 0")
                     return res.status(404).json(error)
                 } else {
-                    return res.status(200).json("Product successfully updated")
+                    console.log("SUCCESS")
+                    return res.status(200).json("Brand successfully updated")
                 }
             }).catch(function (err) {
                 var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
+                console.log("ERROR")
                 return res.status(404).json(error)
             })
     })
