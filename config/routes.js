@@ -1,7 +1,6 @@
 
 exports.setupRoutesAndVersions = function (app) {
   var ROUTES = {
-
     'Users': '/users',
     'Authentications': '/authentications',
     'Products': '/products'

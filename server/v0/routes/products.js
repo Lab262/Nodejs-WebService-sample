@@ -7,7 +7,6 @@ var errorHelper = require('../../../lib/error-handler')
 var objectSerializer = require('../../../lib/object-serializer')
 var models = require('../models/index');
 
-
 /**
  * @swagger
  * /api/v0/products:
@@ -43,7 +42,7 @@ var models = require('../models/index');
  *       404:
  *         description: User not authorized.
  */
-router.route('/users')
+router.route('/products')
 
     .get(function (req, res) {
 
@@ -62,7 +61,7 @@ router.route('/users')
         models.Product.findOne({ where: { id: decodedProduct.id } }).then(function (product) {
 
             if (product === null) {
-                var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify("users not found"))
+                var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify("products not found"))
                 return res.status(404).json(error)
             }
             if (user.accessLevel == 2) {
@@ -130,235 +129,264 @@ router.route('/users')
 
     /**
      * @swagger
-     * /api/v0/users:
+     * /api/v0/products:
      *   post:
      *     tags:
-     *       - Users
-     *     description: Create new user
+     *       - Products
+     *     description: Create new product
      *     parameters:
-    *       - name: isEmailVerified
-    *         description: is email verified
+    *       - name: name
+    *         description: name product
+    *         in: formData
+    *         required: true
+    *         type: string
+    *       - name: price
+    *         description: price product
+    *         in: formData
+    *         required: true
+    *         type: number
+    *       - name: description
+    *         description: description of product
+    *         in: formData
+    *         required: true
+    *         type: string
+    *       - name: discount
+    *         description: discount of product
     *         in: formData
     *         required: false
-    *         type: boolean
-    *       - name: email
-    *         description: user valid email
+    *         type: number
+    *       - name: amount
+    *         description: amount of product
     *         in: formData
+    *         required: true
+    *         type: integer
+    *       - name: x-access-token
+    *         description: access token user
+    *         in: header
     *         required: true
     *         type: string
-    *       - name: password
-    *         description: user password
-    *         in: formData
-    *         required: true
-    *         type: string
-    *       - name: accessLevel
-    *         description: access level type options are 0 = user, 1 = seller, 2 = admin.
-    *         in: formData
-    *         required: true
-    *         type: int
      *     responses:
      *       200:
-     *         description: Por favor, confirme seu email clicando no link em seu email
+     *         description: product object
      *       403:
-     *         description: Por favor, confirme seu email clicando no link em seu email
+     *         description: invalid paramer
      */
     .post(function (req, res) {
 
-        var deserializedUser = null
+        var deserializedProduct = null
 
         objectSerializer.deserializeJSONAPIDataIntoObject(req.body).then(function (deserialized) {
 
-            deserializedUser = deserialized
-            return models.User.findOne({ where: { email: deserialized.email } })
+        deserializedProduct = deserialized
 
-        }).then(function (user) {
+       return models.Product.build(deserializedProduct).save().then(function (product) {
+            var serialized = objectSerializer.serializeObjectIntoJSONAPI(product)
+                return res.status(200).json(product)
 
-            if (user != null && user !== undefined) {
-
-                if (user.isEmailVerified) {
-
-                    var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Email já está em uso", "email")
-                    return res.status(403).json(error)
-
-                } else {
-
-                    user.destroy({
-                        where: { email: user.email }
-                    }).then(function () {
-                    })
-                }
-            }
-
-            return models.User.build(deserializedUser).save()
-
-        }).then(function (newUser) {
-
-            var tokenData = {
-                email: newUser.email,
-                id: newUser.id
-            }
-            var token = Jwt.sign(tokenData, Environment.secret)
-            Mailer.sentMailVerificationLink(newUser, token)
-            var serialized = objectSerializer.serializeObjectIntoJSONAPI(newUser)
-            return res.json({ message: 'Por favor, confirme seu email clicando no link em seu email:' + newUser.email, user: serialized, token: token })
-
-        }).catch(function (err) {
-
-            var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
-            return res.status(403).json(error)
-        })
-
-    })
-
-/**
-  * @swagger
-  * /api/v0/users/{id}:
-  *   patch:
-  *     tags:
-  *       - Users
-  *     description: get user and update by id
-  *     parameters:
- *       - name: id
- *         description: user valid id
- *         in: path
- *         required: true
- *         type: string
- *       - name: x-access-token
- *         description: access token user
- *         in: header
- *         required: true
- *         type: string
- *       - name: email
- *         description: user email
- *         in: formData
- *         required: false
- *         type: string
- *       - name: name
- *         description: user name
- *         in: formData
- *         required: false
- *         type: string
- *       - name: gender
- *         description: user gender
- *         in: formData
- *         required: false
- *         type: string
- *       - name: accessLevel
- *         description: access level type options are 0 = user, 1 = seller, 2 = admin.
- *         in: formData
- *         required: false
- *         type: int
-  *     responses:
-  *       200:
-  *         description: User successfully updated.
-  *       404:
-  *         description: User not found.
-  */
-router.route('/users/:id')
-
-    .patch(function (req, res) {
-
-        models.User.update(
-            objectSerializer.deserializerJSONAndCreateAUpdateClosure(req.body),
-            {
-                where: { id: req.params.id }
-            })
-            .then(function (result) {
-
-                if (result == 0) {
-                    var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify("user not found."))
-                    return res.status(404).json(error)
-                } else {
-                    return res.status(200).json("User successfully updated")
-                }
             }).catch(function (err) {
+
                 var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
-                return res.status(404).json(error)
+                return res.status(403).json(error)
             })
-    })
 
-    /**
-     * @swagger
-     * /api/v0/users/{id}:
-     *   get:
-     *     tags:
-     *       - Users
-     *     description: get user by id
-     *     parameters:
-    *       - name: id
-    *         description: user valid id
-    *         in: path
-    *         required: true
-    *         type: string
-    *       - name: x-access-token
-    *         description: access token user
-    *         in: header
-    *         required: true
-    *         type: string
-     *     responses:
-     *       200:
-     *         description: User informations.
-     *       404:
-     *         description: User not found.
-     */
-    .get(function (req, res) {
-
-        models.User.findOne({ where: { id: req.params.id } }).then(function (user) {
-
-            if (user) {
-                var serialized = objectSerializer.serializeObjectIntoJSONAPI(user)
-                return res.json(serialized)
-            } else {
-                return res.status(404).json("USER NOT FOUND")
-            }
-        }).catch(function (err) {
-            var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
-            return res.status(404).json(error)
         })
     })
 
-    /**
-     * @swagger
-     * /api/v0/users/{id}:
-     *   delete:
-     *     tags:
-     *       - Users
-     *     description: delete user by id
-     *     parameters:
-    *       - name: id
-    *         description: user valid id
-    *         in: path
-    *         required: true
-    *         type: string
-    *       - name: x-access-token
-    *         description: access token user
-    *         in: header
-    *         required: true
-    *         type: string
-     *     responses:
-     *       200:
-     *         description: User successfully deleted.
-     *       404:
-     *         description: User not found.
-     */
-    .delete(function (req, res) {
+        //     var deserializedUser = null
 
-        models.User.destroy({
-            where: {
-                id: req.params.id
-            }
-        }).then(function (result) {
+        //     objectSerializer.deserializeJSONAPIDataIntoObject(req.body).then(function (deserialized) {
 
-            if (result == 0) {
-                var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify("User not found."))
-                return res.status(404).json(error)
-            } else {
-                return res.status(200).json("User successfully deleted")
-            }
-        }).catch(function (err) {
-            var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
-            return res.status(404).json(error)
-        })
-    })
+        //         deserializedUser = deserialized
+        //         return models.User.findOne({ where: { email: deserialized.email } })
 
-module.exports = router
+        //     }).then(function (user) {
+
+        //         if (user != null && user !== undefined) {
+
+        //             if (user.isEmailVerified) {
+
+        //                 var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Email já está em uso", "email")
+        //                 return res.status(403).json(error)
+
+        //             } else {
+
+        //                 user.destroy({
+        //                     where: { email: user.email }
+        //                 }).then(function () {
+        //                 })
+        //             }
+        //         }
+
+        //         return models.User.build(deserializedUser).save()
+
+        //     }).then(function (newUser) {
+
+        //         var tokenData = {
+        //             email: newUser.email,
+        //             id: newUser.id
+        //         }
+        //         var token = Jwt.sign(tokenData, Environment.secret)
+        //         Mailer.sentMailVerificationLink(newUser, token)
+        //         var serialized = objectSerializer.serializeObjectIntoJSONAPI(newUser)
+        //         return res.json({ message: 'Por favor, confirme seu email clicando no link em seu email:' + newUser.email, user: serialized, token: token })
+
+        //     }).catch(function (err) {
+
+        //         var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
+        //         return res.status(403).json(error)
+        //     })
+
+        // })
+
+        /**
+          * @swagger
+          * /api/v0/users/{id}:
+          *   patch:
+          *     tags:
+          *       - Users
+          *     description: get user and update by id
+          *     parameters:
+         *       - name: id
+         *         description: user valid id
+         *         in: path
+         *         required: true
+         *         type: string
+         *       - name: x-access-token
+         *         description: access token user
+         *         in: header
+         *         required: true
+         *         type: string
+         *       - name: email
+         *         description: user email
+         *         in: formData
+         *         required: false
+         *         type: string
+         *       - name: name
+         *         description: user name
+         *         in: formData
+         *         required: false
+         *         type: string
+         *       - name: gender
+         *         description: user gender
+         *         in: formData
+         *         required: false
+         *         type: string
+         *       - name: accessLevel
+         *         description: access level type options are 0 = user, 1 = seller, 2 = admin.
+         *         in: formData
+         *         required: false
+         *         type: int
+          *     responses:
+          *       200:
+          *         description: User successfully updated.
+          *       404:
+          *         description: User not found.
+          */
+        router.route('/users/:id')
+
+            .patch(function (req, res) {
+
+                models.User.update(
+                    objectSerializer.deserializerJSONAndCreateAUpdateClosure(req.body),
+                    {
+                        where: { id: req.params.id }
+                    })
+                    .then(function (result) {
+
+                        if (result == 0) {
+                            var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify("user not found."))
+                            return res.status(404).json(error)
+                        } else {
+                            return res.status(200).json("User successfully updated")
+                        }
+                    }).catch(function (err) {
+                        var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
+                        return res.status(404).json(error)
+                    })
+            })
+
+            /**
+             * @swagger
+             * /api/v0/users/{id}:
+             *   get:
+             *     tags:
+             *       - Users
+             *     description: get user by id
+             *     parameters:
+            *       - name: id
+            *         description: user valid id
+            *         in: path
+            *         required: true
+            *         type: string
+            *       - name: x-access-token
+            *         description: access token user
+            *         in: header
+            *         required: true
+            *         type: string
+             *     responses:
+             *       200:
+             *         description: User informations.
+             *       404:
+             *         description: User not found.
+             */
+            .get(function (req, res) {
+
+                models.User.findOne({ where: { id: req.params.id } }).then(function (user) {
+
+                    if (user) {
+                        var serialized = objectSerializer.serializeObjectIntoJSONAPI(user)
+                        return res.json(serialized)
+                    } else {
+                        return res.status(404).json("USER NOT FOUND")
+                    }
+                }).catch(function (err) {
+                    var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
+                    return res.status(404).json(error)
+                })
+            })
+
+            /**
+             * @swagger
+             * /api/v0/users/{id}:
+             *   delete:
+             *     tags:
+             *       - Users
+             *     description: delete user by id
+             *     parameters:
+            *       - name: id
+            *         description: user valid id
+            *         in: path
+            *         required: true
+            *         type: string
+            *       - name: x-access-token
+            *         description: access token user
+            *         in: header
+            *         required: true
+            *         type: string
+             *     responses:
+             *       200:
+             *         description: User successfully deleted.
+             *       404:
+             *         description: User not found.
+             */
+            .delete(function (req, res) {
+
+                models.User.destroy({
+                    where: {
+                        id: req.params.id
+                    }
+                }).then(function (result) {
+
+                    if (result == 0) {
+                        var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify("User not found."))
+                        return res.status(404).json(error)
+                    } else {
+                        return res.status(200).json("User successfully deleted")
+                    }
+                }).catch(function (err) {
+                    var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
+                    return res.status(404).json(error)
+                })
+            })
+
+        module.exports = router

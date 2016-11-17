@@ -300,14 +300,13 @@ router.route('/auth/socialMedia')
             }
           })
         }
-
       })
 
     }).then(function (newUser) {
 
       if (newUser != null) {
-      var token = Jwt.sign(newUser.getTokenData(), Environment.secret)
-      return res.status(200).json({ message: 'successufully logged with account throught facebook with email:' + newUser.email, user: newUser, token: token })
+        var token = Jwt.sign(newUser.getTokenData(), Environment.secret)
+        return res.status(200).json({ message: 'successufully logged with account throught facebook with email:' + newUser.email, user: newUser, token: token })
       }
     }).catch(function (err) {
 
@@ -347,9 +346,12 @@ function authenticateUser(req, res, user) {
 
     } if (isMatch) {
 
-      console.log(token)
-
+      var result = {
+        token: Jwt.sign(user.getTokenData(), Environment.secret),
+        user: user
+      }
       return res.json(result)
+
     } else {
 
       var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Falha na autenticação: senha Incorreta", "password")
