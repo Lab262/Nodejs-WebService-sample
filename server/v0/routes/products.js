@@ -26,7 +26,7 @@ var models = require('../models/index');
 *         required: false
 *         type: integer
 *       - name: where
-*         description: regex for sequelize example _ email iLike ? OR email iLike ? \n %smad% \n %th% , each line represents a item in array. iLike %th%  means that will search all emails that contains the without consider the sensitive case. For each ? must have a parameter to corresponds like the %th% 
+*         description: regex for sequelize example _ name iLike ? OR description iLike ? \n %camise% \n %vermelha% , each line represents a item in array. iLike %camise%  means that will search all emails that contains the without consider the sensitive case. For each ? must have a parameter to corresponds like the %camise% 
 *         in: query
 *         required: false
 *         type: array
@@ -47,9 +47,9 @@ router.route('/products')
     .get(function (req, res) {
 
         /* query param format
-        [email iLike ? OR email iLike ?,
+        email iLike ? OR email iLike ?,
         %smad%, 
-        %th%]
+        %th%
         */
     
         var pageVariables = objectSerializer.deserializeQueryPaginationIntoVariables(req)
@@ -78,38 +78,6 @@ router.route('/products')
                 return res.status(403).json(error)
             })
         })
-
-    //User.findOne({ _id: decodedUser.id}).exec().then(function(user) {
-    //   if (user.isAdmin) {
-
-    //     return User.count(req.query).exec()
-    //   } else {
-
-    //     var serialized = objectSerializer.serializeObjectIntoJSONAPI(users)
-    //     return res.json(serialized)
-    //   }
-
-    // }).then(function(count) {
-
-    //   totalLength = count
-
-    //   if (totalLength > 0) {
-
-    //     return User.find(req.query).skip(pageVariables.skip).limit(pageVariables.limit).sort({ isAdmin: 'descending'}).exec()
-    //   } else {
-
-    //     return res.status(200).json({data: []});
-    //   }
-    // }).then(function(users) {
-
-    //   var serialized = objectSerializer.serializeObjectIntoJSONAPI(users, totalLength, pageVariables.limit)
-    //   return res.json(serialized)
-    // }).then(function(err) {
-
-    //   var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
-    //   return res.status(403).json(error)
-    // })
-
 
     /**
      * @swagger
@@ -173,52 +141,6 @@ router.route('/products')
 
         })
     })
-
-//     var deserializedUser = null
-
-//     objectSerializer.deserializeJSONAPIDataIntoObject(req.body).then(function (deserialized) {
-
-//         deserializedUser = deserialized
-//         return models.User.findOne({ where: { email: deserialized.email } })
-
-//     }).then(function (user) {
-
-//         if (user != null && user !== undefined) {
-
-//             if (user.isEmailVerified) {
-
-//                 var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Email já está em uso", "email")
-//                 return res.status(403).json(error)
-
-//             } else {
-
-//                 user.destroy({
-//                     where: { email: user.email }
-//                 }).then(function () {
-//                 })
-//             }
-//         }
-
-//         return models.User.build(deserializedUser).save()
-
-//     }).then(function (newUser) {
-
-//         var tokenData = {
-//             email: newUser.email,
-//             id: newUser.id
-//         }
-//         var token = Jwt.sign(tokenData, Environment.secret)
-//         Mailer.sentMailVerificationLink(newUser, token)
-//         var serialized = objectSerializer.serializeObjectIntoJSONAPI(newUser)
-//         return res.json({ message: 'Por favor, confirme seu email clicando no link em seu email:' + newUser.email, user: serialized, token: token })
-
-//     }).catch(function (err) {
-
-//         var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
-//         return res.status(403).json(error)
-//     })
-
-// })
 
 /**
   * @swagger
@@ -334,14 +256,14 @@ router.route('/products/:id')
 
     /**
      * @swagger
-     * /api/v0/users/{id}:
+     * /api/v0/products/{id}:
      *   delete:
      *     tags:
-     *       - Users
-     *     description: delete user by id
+     *       - Products
+     *     description: delete product by id
      *     parameters:
     *       - name: id
-    *         description: user valid id
+    *         description: product valid id
     *         in: path
     *         required: true
     *         type: string
@@ -352,23 +274,23 @@ router.route('/products/:id')
     *         type: string
      *     responses:
      *       200:
-     *         description: User successfully deleted.
+     *         description: Product successfully deleted.
      *       404:
-     *         description: User not found.
+     *         description: Product not found.
      */
     .delete(function (req, res) {
 
-        models.User.destroy({
+        models.Product.destroy({
             where: {
                 id: req.params.id
             }
         }).then(function (result) {
 
             if (result == 0) {
-                var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify("User not found."))
+                var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify("Product not found."))
                 return res.status(404).json(error)
             } else {
-                return res.status(200).json("User successfully deleted")
+                return res.status(200).json("Product successfully deleted")
             }
         }).catch(function (err) {
             var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
