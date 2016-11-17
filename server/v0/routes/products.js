@@ -51,49 +51,33 @@ router.route('/products')
         %smad%, 
         %th%]
         */
-
-        var token = req.headers['x-access-token']
-        var decodedProduct = Jwt.decode(token);
-
+    
         var pageVariables = objectSerializer.deserializeQueryPaginationIntoVariables(req)
-        var totalLength = 0
+            var totalLength = 0
 
-        models.Product.findOne({ where: { id: decodedProduct.id } }).then(function (product) {
-
-            if (product === null) {
-                var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify("products not found"))
-                return res.status(404).json(error)
+            var queryDict = {
+                where: req.query.where
             }
-            if (user.accessLevel == 2) {
-
-                var queryDict = {
+            if (pageVariables.limit != 0 || pageVariables.skip != 0) {
+                queryDict = {
+                    offset: pageVariables.skip,
+                    limit: pageVariables.limit,
                     where: req.query.where
                 }
-                if (pageVariables.limit != 0 || pageVariables.skip != 0) {
-                    queryDict = {
-                        offset: pageVariables.skip,
-                        limit: pageVariables.limit,
-                        where: req.query.where
-                    }
-                }
-
-                return models.User.findAndCountAll(queryDict).then(function (result) {
-                    if (result.length < 1) {
-                        return res.status(200).json({ data: [] });
-                    } else {
-                        var serialized = objectSerializer.serializeObjectIntoJSONAPI(result.rows, result.count, pageVariables.limit)
-                        return res.json(serialized)
-                    }
-                }).catch(function (err) {
-                    var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
-                    return res.status(403).json(error)
-                })
-
-            } else {
-                return res.status(200).json(user)
             }
+
+            return models.Product.findAndCountAll(queryDict).then(function (result) {
+                if (result.length < 1) {
+                    return res.status(200).json({ data: [] });
+                } else {
+                    var serialized = objectSerializer.serializeObjectIntoJSONAPI(result.rows, result.count, pageVariables.limit)
+                    return res.json(serialized)
+                }
+            }).catch(function (err) {
+                var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
+                return res.status(403).json(error)
+            })
         })
-    })
 
     //User.findOne({ _id: decodedUser.id}).exec().then(function(user) {
     //   if (user.isAdmin) {
@@ -177,10 +161,10 @@ router.route('/products')
 
         objectSerializer.deserializeJSONAPIDataIntoObject(req.body).then(function (deserialized) {
 
-        deserializedProduct = deserialized
+            deserializedProduct = deserialized
 
-       return models.Product.build(deserializedProduct).save().then(function (product) {
-            var serialized = objectSerializer.serializeObjectIntoJSONAPI(product)
+            return models.Product.build(deserializedProduct).save().then(function (product) {
+                var serialized = objectSerializer.serializeObjectIntoJSONAPI(product)
                 return res.status(200).json(product)
             }).catch(function (err) {
                 var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
@@ -190,206 +174,206 @@ router.route('/products')
         })
     })
 
-        //     var deserializedUser = null
+//     var deserializedUser = null
 
-        //     objectSerializer.deserializeJSONAPIDataIntoObject(req.body).then(function (deserialized) {
+//     objectSerializer.deserializeJSONAPIDataIntoObject(req.body).then(function (deserialized) {
 
-        //         deserializedUser = deserialized
-        //         return models.User.findOne({ where: { email: deserialized.email } })
+//         deserializedUser = deserialized
+//         return models.User.findOne({ where: { email: deserialized.email } })
 
-        //     }).then(function (user) {
+//     }).then(function (user) {
 
-        //         if (user != null && user !== undefined) {
+//         if (user != null && user !== undefined) {
 
-        //             if (user.isEmailVerified) {
+//             if (user.isEmailVerified) {
 
-        //                 var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Email já está em uso", "email")
-        //                 return res.status(403).json(error)
+//                 var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Email já está em uso", "email")
+//                 return res.status(403).json(error)
 
-        //             } else {
+//             } else {
 
-        //                 user.destroy({
-        //                     where: { email: user.email }
-        //                 }).then(function () {
-        //                 })
-        //             }
-        //         }
+//                 user.destroy({
+//                     where: { email: user.email }
+//                 }).then(function () {
+//                 })
+//             }
+//         }
 
-        //         return models.User.build(deserializedUser).save()
+//         return models.User.build(deserializedUser).save()
 
-        //     }).then(function (newUser) {
+//     }).then(function (newUser) {
 
-        //         var tokenData = {
-        //             email: newUser.email,
-        //             id: newUser.id
-        //         }
-        //         var token = Jwt.sign(tokenData, Environment.secret)
-        //         Mailer.sentMailVerificationLink(newUser, token)
-        //         var serialized = objectSerializer.serializeObjectIntoJSONAPI(newUser)
-        //         return res.json({ message: 'Por favor, confirme seu email clicando no link em seu email:' + newUser.email, user: serialized, token: token })
+//         var tokenData = {
+//             email: newUser.email,
+//             id: newUser.id
+//         }
+//         var token = Jwt.sign(tokenData, Environment.secret)
+//         Mailer.sentMailVerificationLink(newUser, token)
+//         var serialized = objectSerializer.serializeObjectIntoJSONAPI(newUser)
+//         return res.json({ message: 'Por favor, confirme seu email clicando no link em seu email:' + newUser.email, user: serialized, token: token })
 
-        //     }).catch(function (err) {
+//     }).catch(function (err) {
 
-        //         var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
-        //         return res.status(403).json(error)
-        //     })
+//         var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
+//         return res.status(403).json(error)
+//     })
 
-        // })
+// })
 
-        /**
-          * @swagger
-          * /api/v0/products/{id}:
-          *   patch:
-          *     tags:
-          *       - Products
-          *     description: get product and update by id
-          *     parameters:
-         *       - name: id
-         *         description: product valid id
-         *         in: path
-         *         required: true
-         *         type: string
-         *       - name: x-access-token
-         *         description: access token user
-         *         in: header
-         *         required: true
-         *         type: string
-         *       - name: name
-         *         description: name product
-         *         in: formData
-         *         required: false
-         *         type: string
-         *       - name: description
-         *         description: description product
-         *         in: formData
-         *         required: false
-         *         type: string
-         *       - name: price
-         *         description: product price
-         *         in: formData
-         *         required: false
-         *         type: number
-         *       - name: discount
-         *         description: product discount
-         *         in: formData
-         *         required: false
-         *         type: number
-         *       - name: amount
-         *         description: product amount
-         *         in: formData
-         *         required: false
-         *         type: integer
-          *     responses:
-          *       200:
-          *         description: Product successfully updated.
-          *       404:
-          *         description: Product not found.
-          */
-        router.route('/products/:id')
+/**
+  * @swagger
+  * /api/v0/products/{id}:
+  *   patch:
+  *     tags:
+  *       - Products
+  *     description: get product and update by id
+  *     parameters:
+ *       - name: id
+ *         description: product valid id
+ *         in: path
+ *         required: true
+ *         type: string
+ *       - name: x-access-token
+ *         description: access token user
+ *         in: header
+ *         required: true
+ *         type: string
+ *       - name: name
+ *         description: name product
+ *         in: formData
+ *         required: false
+ *         type: string
+ *       - name: description
+ *         description: description product
+ *         in: formData
+ *         required: false
+ *         type: string
+ *       - name: price
+ *         description: product price
+ *         in: formData
+ *         required: false
+ *         type: number
+ *       - name: discount
+ *         description: product discount
+ *         in: formData
+ *         required: false
+ *         type: number
+ *       - name: amount
+ *         description: product amount
+ *         in: formData
+ *         required: false
+ *         type: integer
+  *     responses:
+  *       200:
+  *         description: Product successfully updated.
+  *       404:
+  *         description: Product not found.
+  */
+router.route('/products/:id')
 
-            .patch(function (req, res) {
+    .patch(function (req, res) {
 
-                models.Product.update(
-                    objectSerializer.deserializerJSONAndCreateAUpdateClosure(req.body),
-                    {
-                        where: { id: req.params.id }
-                    })
-                    .then(function (result) {
-
-                        if (result == 0) {
-                            var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify("product not found."))
-                            return res.status(404).json(error)
-                        } else {
-                            return res.status(200).json("Product successfully updated")
-                        }
-                    }).catch(function (err) {
-                        var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
-                        return res.status(404).json(error)
-                    })
+        models.Product.update(
+            objectSerializer.deserializerJSONAndCreateAUpdateClosure(req.body),
+            {
+                where: { id: req.params.id }
             })
+            .then(function (result) {
 
-            /**
-             * @swagger
-             * /api/v0/products/{id}:
-             *   get:
-             *     tags:
-             *       - Products
-             *     description: get product by id
-             *     parameters:
-            *       - name: id
-            *         description: product valid id
-            *         in: path
-            *         required: true
-            *         type: string
-            *       - name: x-access-token
-            *         description: access token user
-            *         in: header
-            *         required: true
-            *         type: string
-             *     responses:
-             *       200:
-             *         description: Product informations.
-             *       404:
-             *         description: Product not found.
-             */
-            .get(function (req, res) {
-
-                models.Product.findOne({ where: { id: req.params.id } }).then(function (product) {
-
-                    if (product) {
-                        var serialized = objectSerializer.serializeObjectIntoJSONAPI(product)
-                        return res.json(serialized)
-                    } else {
-                        return res.status(404).json("PRODUCT NOT FOUND")
-                    }
-                }).catch(function (err) {
-                    var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
+                if (result == 0) {
+                    var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify("product not found."))
                     return res.status(404).json(error)
-                })
+                } else {
+                    return res.status(200).json("Product successfully updated")
+                }
+            }).catch(function (err) {
+                var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
+                return res.status(404).json(error)
             })
+    })
 
-            /**
-             * @swagger
-             * /api/v0/users/{id}:
-             *   delete:
-             *     tags:
-             *       - Users
-             *     description: delete user by id
-             *     parameters:
-            *       - name: id
-            *         description: user valid id
-            *         in: path
-            *         required: true
-            *         type: string
-            *       - name: x-access-token
-            *         description: access token user
-            *         in: header
-            *         required: true
-            *         type: string
-             *     responses:
-             *       200:
-             *         description: User successfully deleted.
-             *       404:
-             *         description: User not found.
-             */
-            .delete(function (req, res) {
+    /**
+     * @swagger
+     * /api/v0/products/{id}:
+     *   get:
+     *     tags:
+     *       - Products
+     *     description: get product by id
+     *     parameters:
+    *       - name: id
+    *         description: product valid id
+    *         in: path
+    *         required: true
+    *         type: string
+    *       - name: x-access-token
+    *         description: access token user
+    *         in: header
+    *         required: true
+    *         type: string
+     *     responses:
+     *       200:
+     *         description: Product informations.
+     *       404:
+     *         description: Product not found.
+     */
+    .get(function (req, res) {
 
-                models.User.destroy({
-                    where: {
-                        id: req.params.id
-                    }
-                }).then(function (result) {
+        models.Product.findOne({ where: { id: req.params.id } }).then(function (product) {
 
-                    if (result == 0) {
-                        var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify("User not found."))
-                        return res.status(404).json(error)
-                    } else {
-                        return res.status(200).json("User successfully deleted")
-                    }
-                }).catch(function (err) {
-                    var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
-                    return res.status(404).json(error)
-                })
-            })
+            if (product) {
+                var serialized = objectSerializer.serializeObjectIntoJSONAPI(product)
+                return res.json(serialized)
+            } else {
+                return res.status(404).json("PRODUCT NOT FOUND")
+            }
+        }).catch(function (err) {
+            var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
+            return res.status(404).json(error)
+        })
+    })
 
-        module.exports = router
+    /**
+     * @swagger
+     * /api/v0/users/{id}:
+     *   delete:
+     *     tags:
+     *       - Users
+     *     description: delete user by id
+     *     parameters:
+    *       - name: id
+    *         description: user valid id
+    *         in: path
+    *         required: true
+    *         type: string
+    *       - name: x-access-token
+    *         description: access token user
+    *         in: header
+    *         required: true
+    *         type: string
+     *     responses:
+     *       200:
+     *         description: User successfully deleted.
+     *       404:
+     *         description: User not found.
+     */
+    .delete(function (req, res) {
+
+        models.User.destroy({
+            where: {
+                id: req.params.id
+            }
+        }).then(function (result) {
+
+            if (result == 0) {
+                var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify("User not found."))
+                return res.status(404).json(error)
+            } else {
+                return res.status(200).json("User successfully deleted")
+            }
+        }).catch(function (err) {
+            var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
+            return res.status(404).json(error)
+        })
+    })
+
+module.exports = router
