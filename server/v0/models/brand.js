@@ -4,7 +4,7 @@ module.exports = function(sequelize, DataTypes) {
     name: DataTypes.STRING,
     description: DataTypes.STRING,
     discount: DataTypes.FLOAT,
-    brand_phone: DataTypes.INTEGER,
+    brandPhone: DataTypes.INTEGER,
     email: DataTypes.STRING
   }, {
     classMethods: {
