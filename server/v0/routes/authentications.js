@@ -285,13 +285,16 @@ router.route('/auth/socialMedia')
 
           JwtHelper.comparePassword(req.body.password, socialMedia[0].socialMediaPassword, function (err, isMatch) {
             if (err) {
+
               var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Falha na autenticação: senha incorreta", "password")
               return res.status(422).json(error)
             }
             if (isMatch) {
               var token = Jwt.sign(foundUser.getTokenData(), Environment.secret)
+              console.log(token)
               return res.status(200).json({ message: 'successufully logged throught facebook with email:' + foundUser.email, user: foundUser, token: token })
             } else {
+
               var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Falha na autenticação: senha incorreta", "password")
               return res.status(422).json(error)
             }
@@ -301,9 +304,13 @@ router.route('/auth/socialMedia')
       })
 
     }).then(function (newUser) {
+
+      if (newUser != null) {
       var token = Jwt.sign(newUser.getTokenData(), Environment.secret)
       return res.status(200).json({ message: 'successufully logged with account throught facebook with email:' + newUser.email, user: newUser, token: token })
+      }
     }).catch(function (err) {
+
       var error = objectSerializer.serializeSimpleErrorIntoJSONAPI("Falha na autenticação: senha incorreta", "password")
       return res.status(422).json(error)
     });
@@ -340,11 +347,7 @@ function authenticateUser(req, res, user) {
 
     } if (isMatch) {
 
-      var result = {
-        token: Jwt.sign(user.getTokenData(), Environment.secret),
-        user: user
-      }
-
+      console.log(token)
 
       return res.json(result)
     } else {
