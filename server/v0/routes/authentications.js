@@ -227,7 +227,7 @@ router.route('/auth/forgotPasswordConfirmed/:token')
 *         description: social media type options are 0 = Facebook, 1 = Instagram, 2 = Gmail, 3 = Twitter.
 *         in: formData
 *         required: true
-*         type: int
+*         type: integer
 *       - name: socialMediaId
 *         description: social media id.
 *         in: formData
