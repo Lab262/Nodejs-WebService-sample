@@ -238,14 +238,14 @@ router.route('/products')
 
         /**
           * @swagger
-          * /api/v0/users/{id}:
+          * /api/v0/products/{id}:
           *   patch:
           *     tags:
-          *       - Users
-          *     description: get user and update by id
+          *       - Products
+          *     description: get product and update by id
           *     parameters:
          *       - name: id
-         *         description: user valid id
+         *         description: product valid id
          *         in: path
          *         required: true
          *         type: string
@@ -254,37 +254,42 @@ router.route('/products')
          *         in: header
          *         required: true
          *         type: string
-         *       - name: email
-         *         description: user email
-         *         in: formData
-         *         required: false
-         *         type: string
          *       - name: name
-         *         description: user name
+         *         description: name product
          *         in: formData
          *         required: false
          *         type: string
-         *       - name: gender
-         *         description: user gender
+         *       - name: description
+         *         description: description product
          *         in: formData
          *         required: false
          *         type: string
-         *       - name: accessLevel
-         *         description: access level type options are 0 = user, 1 = seller, 2 = admin.
+         *       - name: price
+         *         description: product price
          *         in: formData
          *         required: false
-         *         type: int
+         *         type: number
+         *       - name: discount
+         *         description: product discount
+         *         in: formData
+         *         required: false
+         *         type: number
+         *       - name: amount
+         *         description: product amount
+         *         in: formData
+         *         required: false
+         *         type: integer
           *     responses:
           *       200:
-          *         description: User successfully updated.
+          *         description: Product successfully updated.
           *       404:
-          *         description: User not found.
+          *         description: Product not found.
           */
         router.route('/products/:id')
 
             .patch(function (req, res) {
 
-                models.User.update(
+                models.Product.update(
                     objectSerializer.deserializerJSONAndCreateAUpdateClosure(req.body),
                     {
                         where: { id: req.params.id }
@@ -292,10 +297,10 @@ router.route('/products')
                     .then(function (result) {
 
                         if (result == 0) {
-                            var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify("user not found."))
+                            var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify("product not found."))
                             return res.status(404).json(error)
                         } else {
-                            return res.status(200).json("User successfully updated")
+                            return res.status(200).json("Product successfully updated")
                         }
                     }).catch(function (err) {
                         var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
