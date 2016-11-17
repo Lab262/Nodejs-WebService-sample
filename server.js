@@ -35,8 +35,10 @@ var isUserPostRoute = ((req.path.indexOf('users') > -1 && req.method === 'POST')
 
   if (!isUserPostRoute) {
     jwtHelper.verifyJsonWebToken(req,res,next,app)
+  } else {
+    next()
   }
-  next()
+  
 })
 
 //Format debug log 
