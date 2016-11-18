@@ -259,14 +259,14 @@ router.route('/brands/:id')
 
     /**
      * @swagger
-     * /api/v0/products/{id}:
+     * /api/v0/brands/{id}:
      *   delete:
      *     tags:
-     *       - Products
-     *     description: delete product by id
+     *       - Brands
+     *     description: delete brand by id
      *     parameters:
     *       - name: id
-    *         description: product valid id
+    *         description: brand valid id
     *         in: path
     *         required: true
     *         type: string
@@ -277,23 +277,23 @@ router.route('/brands/:id')
     *         type: string
      *     responses:
      *       200:
-     *         description: Product successfully deleted.
+     *         description: Brand successfully deleted.
      *       404:
-     *         description: Product not found.
+     *         description: Brand not found.
      */
     .delete(function (req, res) {
 
-        models.Product.destroy({
+        models.Brand.destroy({
             where: {
                 id: req.params.id
             }
         }).then(function (result) {
 
             if (result == 0) {
-                var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify("Product not found."))
+                var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify("Brand not found."))
                 return res.status(404).json(error)
             } else {
-                return res.status(200).json("Product successfully deleted")
+                return res.status(200).json("Brand successfully deleted")
             }
         }).catch(function (err) {
             var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
