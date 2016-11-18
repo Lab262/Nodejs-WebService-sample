@@ -9,11 +9,11 @@ var models = require('../models/index');
 
 /**
  * @swagger
- * /api/v0/products:
+ * /api/v0/brands:
  *   get:
  *     tags:
- *       - Products
- *     description: get all products
+ *       - Brands
+ *     description: get all brands
  *     parameters:
 *       - name: page
 *         description: number of pages
@@ -38,7 +38,7 @@ var models = require('../models/index');
 *         type: string
  *     responses:
  *       200:
- *         description: all products.
+ *         description: all brands.
  *       404:
  *         description: User not authorized.
  */
@@ -66,7 +66,7 @@ router.route('/brands')
                 }
             }
 
-            return models.Product.findAndCountAll(queryDict).then(function (result) {
+            return models.Brand.findAndCountAll(queryDict).then(function (result) {
                 if (result.length < 1) {
                     return res.status(200).json({ data: [] });
                 } else {
