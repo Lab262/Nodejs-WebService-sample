@@ -219,14 +219,14 @@ router.route('/brands/:id')
 
     /**
      * @swagger
-     * /api/v0/products/{id}:
+     * /api/v0/brands/{id}:
      *   get:
      *     tags:
-     *       - Products
-     *     description: get product by id
+     *       - Brands
+     *     description: get brand by id
      *     parameters:
     *       - name: id
-    *         description: product valid id
+    *         description: brand valid id
     *         in: path
     *         required: true
     *         type: string
@@ -237,19 +237,19 @@ router.route('/brands/:id')
     *         type: string
      *     responses:
      *       200:
-     *         description: Product informations.
+     *         description: Brand informations.
      *       404:
-     *         description: Product not found.
+     *         description: Brand not found.
      */
     .get(function (req, res) {
 
-        models.Product.findOne({ where: { id: req.params.id } }).then(function (product) {
+        models.Brand.findOne({ where: { id: req.params.id } }).then(function (brand) {
 
-            if (product) {
-                var serialized = objectSerializer.serializeObjectIntoJSONAPI(product)
+            if (brand) {
+                var serialized = objectSerializer.serializeObjectIntoJSONAPI(brand)
                 return res.json(serialized)
             } else {
-                return res.status(404).json("PRODUCT NOT FOUND")
+                return res.status(404).json("BRAND NOT FOUND")
             }
         }).catch(function (err) {
             var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
