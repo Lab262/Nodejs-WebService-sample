@@ -67,12 +67,9 @@ router.route('/products')
             }
 
             return models.Product.findAndCountAll(queryDict).then(function (result) {
-                if (result.length < 1) {
-                    return res.status(200).json({ data: [] });
-                } else {
+          
                     var serialized = objectSerializer.serializeObjectIntoJSONAPI(result.rows, result.count, pageVariables.limit)
                     return res.json(serialized)
-                }
             }).catch(function (err) {
                 var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
                 return res.status(403).json(error)
