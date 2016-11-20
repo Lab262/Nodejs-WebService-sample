@@ -82,13 +82,15 @@ router.route('/users')
     
             var serialized = objectSerializer.serializeObjectIntoJSONAPI(result.rows, result.count, pageVariables.limit)
             return res.json(serialized)
+
         }).catch(function (err) {
           var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
           return res.status(403).json(error)
         })
 
       } else {
-        return res.status(200).json(user)
+           var serialized = objectSerializer.serializeObjectIntoJSONAPI(user, 1, 1)
+            return res.status(200).json(serialized)
       }
     })
   })
