@@ -5,7 +5,9 @@ module.exports = function(sequelize, DataTypes) {
     price: DataTypes.FLOAT,
     description: DataTypes.STRING,
     discount: DataTypes.FLOAT,
-    amount: DataTypes.INTEGER
+    amount: DataTypes.INTEGER,
+    BrandId: DataTypes.INTEGER
+
   }, {
     classMethods: {
       associate: function(models) {
