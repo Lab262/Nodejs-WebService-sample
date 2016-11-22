@@ -72,11 +72,25 @@ router.route('/products')
         var queryDict = {
             where: req.query.where
         }
+        
         if (pageVariables.limit != 0 || pageVariables.skip != 0) {
             queryDict = {
                 offset: pageVariables.skip,
                 limit: pageVariables.limit,
                 where: req.query.where
+            }
+        }
+
+        if (req.query.include != undefined) {
+
+            if (Object.prototype.toString.call(req.query.include) === '[object Array]') {
+                queryDict = {
+                    attributes: req.query.include
+                }
+            } else if (typeof req.query.include === "string" || req.query.include instanceof String) {
+                queryDict = {
+                    attributes: [req.query.include]
+                }
             }
         }
 
@@ -88,14 +102,12 @@ router.route('/products')
                     orderOptionsArray[i] = req.query.order[i].split(" ")
                 }
             } else if (typeof req.query.order === "string" || req.query.order instanceof String) {
-                 orderOptionsArray = [req.query.order.split(" ")]
+                orderOptionsArray = [req.query.order.split(" ")]
             }
             queryDict = {
-                    order: orderOptionsArray
+                order: orderOptionsArray
             }
         }
-
-        
 
 
         return models.Product.findAndCountAll(queryDict).then(function (result) {
