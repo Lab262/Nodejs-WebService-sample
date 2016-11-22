@@ -31,6 +31,12 @@ var models = require('../models/index');
 *         required: false
 *         type: array
 *         collectionFormat: multi
+*       - name: include
+*         description: array of attributes for include
+*         in: query
+*         required: false
+*         type: array
+*         collectionFormat: multi
 *       - name: x-access-token
 *         description: access token user
 *         in: header
@@ -66,11 +72,27 @@ router.route('/products')
                 }
             }
 
-            return models.Product.findAndCountAll(queryDict).then(function (result) {
-          
-                    var serialized = objectSerializer.serializeObjectIntoJSONAPI(result.rows, result.count, pageVariables.limit)
-                    return res.json(serialized)
-            }).catch(function (err) {
+            if (req.query.include != undefined) {
+                
+                    if (Object.prototype.toString.call(req.query.include) === '[object Array]') {
+                        queryDict = {   
+                            attributes: req.query.include
+                        }
+                    } else if (typeof req.query.include === "string" || req.query.include instanceof String ){
+                        queryDict = {   
+                            attributes: [req.query.include] 
+                        }
+                    }
+
+            }  
+
+
+                return models.Product.findAndCountAll(queryDict).then(function (result) {
+                        
+                        var serialized = objectSerializer.serializeObjectIntoJSONAPI(result.rows, result.count, pageVariables.limit)
+                        return res.json(serialized)
+
+                }).catch(function (err) {
                 var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
                 return res.status(403).json(error)
             })
