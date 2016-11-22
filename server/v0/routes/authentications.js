@@ -276,7 +276,9 @@ router.route('/auth/socialMedia')
           return models.SocialMedia.create({
             socialMediaId: req.body.socialMediaId,
             socialMediaType: req.body.socialMediaType,
-            socialMediaPassword: req.body.password
+            socialMediaPassword: req.body.password,
+            UserId: foundUser.id,
+
           }).then(function (socialMedia) {
 
             return foundUser.addSocialMedia(socialMedia)

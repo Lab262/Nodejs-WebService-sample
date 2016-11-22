@@ -38,7 +38,7 @@ var models = require('../models/index');
 *         type: string
  *     responses:
  *       200:
- *         description: all products.
+ *         description: all user wish products by query.
  *       404:
  *         description: User not authorized.
  */
@@ -66,8 +66,7 @@ router.route('/userwishproducts')
                 }
             }
 
-            return models.Product.findAndCountAll(queryDict).then(function (result) {
-          
+            return models.UserWishProduct.findAndCountAll(queryDict).then(function (result) {
                     var serialized = objectSerializer.serializeObjectIntoJSONAPI(result.rows, result.count, pageVariables.limit)
                     return res.json(serialized)
             }).catch(function (err) {
@@ -88,12 +87,12 @@ router.route('/userwishproducts')
     *         description: user id 
     *         in: formData
     *         required: true
-    *         type: integer
+    *         type: string
     *       - name: ProductId
     *         description: product id
     *         in: formData
     *         required: true
-    *         type: integer
+    *         type: string
     *       - name: x-access-token
     *         description: access token user
     *         in: header
@@ -126,14 +125,14 @@ router.route('/userwishproducts')
 
 /**
   * @swagger
-  * /api/v0/products/{id}:
+  * /api/v0/userwishproducts/{id}:
   *   patch:
   *     tags:
-  *       - Products
-  *     description: get product and update by id
+  *       - UserWishProducts
+  *     description: get user wish products and update by id
   *     parameters:
  *       - name: id
- *         description: product valid id
+ *         description: user wish product valid id
  *         in: path
  *         required: true
  *         type: string
@@ -142,42 +141,27 @@ router.route('/userwishproducts')
  *         in: header
  *         required: true
  *         type: string
- *       - name: name
- *         description: name product
+ *       - name: UserId
+ *         description: user id 
  *         in: formData
  *         required: false
  *         type: string
- *       - name: description
- *         description: description product
+ *       - name: ProductId
+ *         description: product id
  *         in: formData
  *         required: false
  *         type: string
- *       - name: price
- *         description: product price
- *         in: formData
- *         required: false
- *         type: number
- *       - name: discount
- *         description: product discount
- *         in: formData
- *         required: false
- *         type: number
- *       - name: amount
- *         description: product amount
- *         in: formData
- *         required: false
- *         type: integer
   *     responses:
   *       200:
-  *         description: Product successfully updated.
+  *         description: User wish product successfully updated.
   *       404:
-  *         description: Product not found.
+  *         description: User wish product not found.
   */
-router.route('/products/:id')
+router.route('/userwishproducts/:id')
 
     .patch(function (req, res) {
 
-        models.Product.update(
+        models.UserWishProduct.update(
             objectSerializer.deserializerJSONAndCreateAUpdateClosure(req.body),
             {
                 where: { id: req.params.id }
@@ -185,10 +169,10 @@ router.route('/products/:id')
             .then(function (result) {
 
                 if (result == 0) {
-                    var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify("product not found."))
+                    var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify("User Wish Product not found."))
                     return res.status(404).json(error)
                 } else {
-                    return res.status(200).json("Product successfully updated")
+                    return res.status(200).json("User Wish Product successfully updated")
                 }
             }).catch(function (err) {
                 var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
@@ -198,17 +182,17 @@ router.route('/products/:id')
 
     /**
      * @swagger
-     * /api/v0/products/{id}:
+     * /api/v0/userwishproducts/{id}:
      *   get:
      *     tags:
-     *       - Products
-     *     description: get product by id
+     *       - UserWishProducts
+     *     description: get user wish products by id
      *     parameters:
     *       - name: id
-    *         description: product valid id
+    *         description: user wish product valid id
     *         in: path
     *         required: true
-    *         type: string
+    *         type: integer
     *       - name: x-access-token
     *         description: access token user
     *         in: header
@@ -216,19 +200,19 @@ router.route('/products/:id')
     *         type: string
      *     responses:
      *       200:
-     *         description: Product informations.
+     *         description: User wish products informations.
      *       404:
-     *         description: Product not found.
+     *         description: User wish products not found.
      */
     .get(function (req, res) {
 
-        models.Product.findOne({ where: { id: req.params.id } }).then(function (product) {
+        models.UserWishProduct.findOne({ where: { id: req.params.id } }).then(function (userWishProduct) {
 
-            if (product) {
-                var serialized = objectSerializer.serializeObjectIntoJSONAPI(product)
+            if (userWishProduct) {
+                var serialized = objectSerializer.serializeObjectIntoJSONAPI(userWishProduct)
                 return res.json(serialized)
             } else {
-                return res.status(404).json("PRODUCT NOT FOUND")
+                return res.status(404).json("USER WISH PRODUCT NOT FOUND")
             }
         }).catch(function (err) {
             var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
