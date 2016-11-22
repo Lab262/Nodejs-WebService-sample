@@ -99,6 +99,11 @@ router.route('/products')
     *         in: formData
     *         required: true
     *         type: string
+    *       - name: BrandId
+    *         description: brand id
+    *         in: formData
+    *         required: true
+    *         type: integer
     *       - name: discount
     *         description: discount of product, decimal separated by point "."
     *         in: formData

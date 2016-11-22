@@ -13,9 +13,22 @@ module.exports = function (sequelize, DataTypes) {
     
   }, 
     {
+
+
+// User = sequelize.define('User', {})
+// Project = sequelize.define('Project', {})
+// UserProjects = sequelize.define('UserProjects', {
+//     status: DataTypes.STRING
+// })
+ 
+// User.belongsToMany(Project, { through: UserProjects })
+// Project.belongsToMany(User, { through: UserProjects })
+//       User.belongsToMany(Project, { as: 'Tasks', through: 'worker_tasks' })
+// Project.belongsToMany(User, { as: 'Workers', through: 'worker_tasks' })
       classMethods: {
         associate: function (models) {
           User.hasMany(models.SocialMedia);
+          User.belongsToMany(models.User, { as:});
         }
       },
       instanceMethods: {
