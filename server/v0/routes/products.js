@@ -107,21 +107,7 @@ router.route('/products')
      */
     .post(function (req, res) {
 
-        var deserializedProduct = null
-
-        objectSerializer.deserializeJSONAPIDataIntoObject(req.body).then(function (deserialized) {
-
-            deserializedProduct = deserialized
-
-            return models.Product.build(deserializedProduct).save().then(function (product) {
-                var serialized = objectSerializer.serializeObjectIntoJSONAPI(product)
-                return res.status(200).json(product)
-            }).catch(function (err) {
-                var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
-                return res.status(403).json(error)
-            })
-
-        })
+       modelController.createModel(req,res)
     })
 
 /**
