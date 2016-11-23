@@ -67,12 +67,7 @@ router.route('/products')
 
 
 
-        // var pageVariables = objectSerializer.deserializeQueryPaginationIntoVariables(req)
-        // var totalLength = 0
-
-        // var queryDict = {
-        //     where: req.query.where,
-        // }
+        var pageVariables = objectSerializer.deserializeQueryPaginationIntoVariables(req)
         
         // if (pageVariables.limit != 0 || pageVariables.skip != 0) {
         //     queryDict = {
@@ -123,8 +118,8 @@ router.route('/products')
         models.sequelize.query(query, { type: models.sequelize.QueryTypes.SELECT})
         .then(function(result) {
 
-            // var serialized = objectSerializer.serializeObjectIntoJSONAPI(result, 1, 1)
-            return res.json(result)
+            var serialized = objectSerializer.serializeObjectIntoJSONAPI(result, result.length,  pageVariables.limit,'Product')
+            return res.status(200).json(serialized)
             // We don't need spread here, since only the results will be returned for select queries
         }).catch(function (err) {
 
