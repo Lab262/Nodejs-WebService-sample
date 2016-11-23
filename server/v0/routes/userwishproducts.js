@@ -1,11 +1,9 @@
 var express = require('express')
 var router = express.Router()
-var Environment = require('../../../config/environment')
-var Jwt = require('jsonwebtoken')
-var Mailer = require('../../../lib/mailer')
-var errorHelper = require('../../../lib/error-handler')
-var objectSerializer = require('../../../lib/object-serializer')
 var models = require('../models/index');
+
+var ModelController = require('../../../lib/model-controller')
+var modelController = new ModelController(models.UserWishProduct);
 
 /**
  * @swagger
@@ -45,35 +43,8 @@ var models = require('../models/index');
 router.route('/userwishproducts')
 
     .get(function (req, res) {
-
-        /* query param format
-        email iLike ? OR email iLike ?,
-        %smad%, 
-        %th%
-        */
-    
-        var pageVariables = objectSerializer.deserializeQueryPaginationIntoVariables(req)
-            var totalLength = 0
-
-            var queryDict = {
-                where: req.query.where
-            }
-            if (pageVariables.limit != 0 || pageVariables.skip != 0) {
-                queryDict = {
-                    offset: pageVariables.skip,
-                    limit: pageVariables.limit,
-                    where: req.query.where
-                }
-            }
-
-            return models.UserWishProduct.findAndCountAll(queryDict).then(function (result) {
-                    var serialized = objectSerializer.serializeObjectIntoJSONAPI(result.rows, result.count, pageVariables.limit)
-                    return res.json(serialized)
-            }).catch(function (err) {
-                var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
-                return res.status(403).json(error)
-            })
-        })
+        modelController.searchObjects(req, res)
+    })
 
     /**
      * @swagger
@@ -105,22 +76,7 @@ router.route('/userwishproducts')
      *         description: invalid paramer
      */
     .post(function (req, res) {
-
-        var deserializedUserWishProduct = null
-
-        objectSerializer.deserializeJSONAPIDataIntoObject(req.body).then(function (deserialized) {
-
-            deserializedUserWishProduct = deserialized
-
-            return models.UserWishProduct.build(deserializedUserWishProduct).save().then(function (userWishProduct) {
-                var serialized = objectSerializer.serializeObjectIntoJSONAPI(userWishProduct)
-                return res.status(200).json(userWishProduct)
-            }).catch(function (err) {
-                var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
-                return res.status(403).json(error)
-            })
-
-        })
+        modelController.createModel(req, res)
     })
 
 /**
@@ -160,24 +116,7 @@ router.route('/userwishproducts')
 router.route('/userwishproducts/:id')
 
     .patch(function (req, res) {
-
-        models.UserWishProduct.update(
-            objectSerializer.deserializerJSONAndCreateAUpdateClosure(req.body),
-            {
-                where: { id: req.params.id }
-            })
-            .then(function (result) {
-
-                if (result == 0) {
-                    var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify("User Wish Product not found."))
-                    return res.status(404).json(error)
-                } else {
-                    return res.status(200).json("User Wish Product successfully updated")
-                }
-            }).catch(function (err) {
-                var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
-                return res.status(404).json(error)
-            })
+        modelController.updateModel(req, res);
     })
 
     /**
@@ -205,19 +144,7 @@ router.route('/userwishproducts/:id')
      *         description: User wish products not found.
      */
     .get(function (req, res) {
-
-        models.UserWishProduct.findOne({ where: { id: req.params.id } }).then(function (userWishProduct) {
-
-            if (userWishProduct) {
-                var serialized = objectSerializer.serializeObjectIntoJSONAPI(userWishProduct)
-                return res.json(serialized)
-            } else {
-                return res.status(404).json("USER WISH PRODUCT NOT FOUND")
-            }
-        }).catch(function (err) {
-            var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
-            return res.status(404).json(error)
-        })
+        modelController.searchOneWithId(req, res)
     })
 
     /**
@@ -245,23 +172,7 @@ router.route('/userwishproducts/:id')
      *         description: Product not found.
      */
     .delete(function (req, res) {
-
-        models.Product.destroy({
-            where: {
-                id: req.params.id
-            }
-        }).then(function (result) {
-
-            if (result == 0) {
-                var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify("Product not found."))
-                return res.status(404).json(error)
-            } else {
-                return res.status(200).json("Product successfully deleted")
-            }
-        }).catch(function (err) {
-            var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
-            return res.status(404).json(error)
-        })
+        modelController.destroyOneWithId(req, res)
     })
 
 module.exports = router

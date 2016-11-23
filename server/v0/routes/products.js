@@ -1,6 +1,5 @@
 var express = require('express')
 var router = express.Router()
-var objectSerializer = require('../../../lib/object-serializer')
 var models = require('../models/index');
 
 var ModelController = require('../../../lib/model-controller')
@@ -106,7 +105,6 @@ router.route('/products')
      *         description: invalid paramer
      */
     .post(function (req, res) {
-
        modelController.createModel(req,res)
     })
 
@@ -162,24 +160,7 @@ router.route('/products')
 router.route('/products/:id')
 
     .patch(function (req, res) {
-
-        models.Product.update(
-            objectSerializer.deserializerJSONAndCreateAUpdateClosure(req.body),
-            {
-                where: { id: req.params.id }
-            })
-            .then(function (result) {
-
-                if (result == 0) {
-                    var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify("product not found."))
-                    return res.status(404).json(error)
-                } else {
-                    return res.status(200).json("Product successfully updated")
-                }
-            }).catch(function (err) {
-                var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
-                return res.status(404).json(error)
-            })
+        modelController.updateModel(req,res);
     })
 
     /**

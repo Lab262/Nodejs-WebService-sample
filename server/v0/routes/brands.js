@@ -1,11 +1,9 @@
 var express = require('express')
 var router = express.Router()
-var Environment = require('../../../config/environment')
-var Jwt = require('jsonwebtoken')
-var Mailer = require('../../../lib/mailer')
-var errorHelper = require('../../../lib/error-handler')
-var objectSerializer = require('../../../lib/object-serializer')
 var models = require('../models/index');
+
+var ModelController = require('../../../lib/model-controller')
+var modelController = new ModelController(models.Brand);
 
 /**
  * @swagger
@@ -45,35 +43,7 @@ var models = require('../models/index');
 router.route('/brands')
 
     .get(function (req, res) {
-
-        /* query param format
-        email iLike ? OR email iLike ?,
-        %smad%, 
-        %th%
-        */
-    
-        var pageVariables = objectSerializer.deserializeQueryPaginationIntoVariables(req)
-            var totalLength = 0
-
-            var queryDict = {
-                where: req.query.where
-            }
-            if (pageVariables.limit != 0 || pageVariables.skip != 0) {
-                queryDict = {
-                    offset: pageVariables.skip,
-                    limit: pageVariables.limit,
-                    where: req.query.where
-                }
-            }
-
-            return models.Brand.findAndCountAll(queryDict).then(function (result) {
-          
-                    var serialized = objectSerializer.serializeObjectIntoJSONAPI(result.rows, result.count, pageVariables.limit)
-                    return res.json(serialized)
-            }).catch(function (err) {
-                var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
-                return res.status(403).json(error)
-            })
+               modelController.searchObjects(req, res)
         })
 
     /**
@@ -121,22 +91,7 @@ router.route('/brands')
      *         description: invalid paramer
      */
     .post(function (req, res) {
-
-        var deserializedBrand = null
-
-        objectSerializer.deserializeJSONAPIDataIntoObject(req.body).then(function (deserialized) {
-
-            deserializedBrand = deserialized
-
-            return models.Brand.build(deserializedBrand).save().then(function (brand) {
-                var serialized = objectSerializer.serializeObjectIntoJSONAPI(brand)
-                return res.status(200).json(brand)
-            }).catch(function (err) {
-                var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
-                return res.status(403).json(error)
-            })
-
-        })
+               modelController.createModel(req,res)
     })
 
 /**
@@ -191,27 +146,7 @@ router.route('/brands')
 router.route('/brands/:id')
 
     .patch(function (req, res) {
-
-        models.Brand.update(
-            objectSerializer.deserializerJSONAndCreateAUpdateClosure(req.body),
-            {
-                where: { id: req.params.id }
-            })
-            .then(function (result) {
-               
-                if (result == 0) {
-                    var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify("brand not found."))
-                    console.log("RESULT 0")
-                    return res.status(404).json(error)
-                } else {
-                    console.log("SUCCESS")
-                    return res.status(200).json("Brand successfully updated")
-                }
-            }).catch(function (err) {
-                var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
-                console.log("ERROR")
-                return res.status(404).json(error)
-            })
+               modelController.updateModel(req,res);
     })
 
     /**
@@ -239,19 +174,7 @@ router.route('/brands/:id')
      *         description: Brand not found.
      */
     .get(function (req, res) {
-
-        models.Brand.findOne({ where: { id: req.params.id } }).then(function (brand) {
-
-            if (brand) {
-                var serialized = objectSerializer.serializeObjectIntoJSONAPI(brand)
-                return res.json(serialized)
-            } else {
-                return res.status(404).json("BRAND NOT FOUND")
-            }
-        }).catch(function (err) {
-            var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
-            return res.status(404).json(error)
-        })
+       modelController.searchOneWithId(req,res)
     })
 
     /**
@@ -279,23 +202,7 @@ router.route('/brands/:id')
      *         description: Brand not found.
      */
     .delete(function (req, res) {
-
-        models.Brand.destroy({
-            where: {
-                id: req.params.id
-            }
-        }).then(function (result) {
-
-            if (result == 0) {
-                var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify("Brand not found."))
-                return res.status(404).json(error)
-            } else {
-                return res.status(200).json("Brand successfully deleted")
-            }
-        }).catch(function (err) {
-            var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
-            return res.status(404).json(error)
-        })
+        modelController.destroyOneWithId(req,res)
     })
 
 module.exports = router

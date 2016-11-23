@@ -94,39 +94,7 @@ router.route('/users')
       }
     })
   })
-
-  //User.findOne({ _id: decodedUser.id}).exec().then(function(user) {
-  //   if (user.isAdmin) {
-
-  //     return User.count(req.query).exec()
-  //   } else {
-
-  //     var serialized = objectSerializer.serializeObjectIntoJSONAPI(users)
-  //     return res.json(serialized)
-  //   }
-
-  // }).then(function(count) {
-
-  //   totalLength = count
-
-  //   if (totalLength > 0) {
-
-  //     return User.find(req.query).skip(pageVariables.skip).limit(pageVariables.limit).sort({ isAdmin: 'descending'}).exec()
-  //   } else {
-
-  //     return res.status(200).json({data: []});
-  //   }
-  // }).then(function(users) {
-
-  //   var serialized = objectSerializer.serializeObjectIntoJSONAPI(users, totalLength, pageVariables.limit)
-  //   return res.json(serialized)
-  // }).then(function(err) {
-
-  //   var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
-  //   return res.status(403).json(error)
-  // })
-
-
+  
   /**
    * @swagger
    * /api/v0/users:
