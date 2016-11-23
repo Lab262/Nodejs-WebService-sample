@@ -29,8 +29,7 @@ var models = require('../models/index');
 *         description: regex for sequelize example _ name iLike ? OR description iLike ? \n %camise% \n %vermelha% , each line represents a item in array. iLike %camise%  means that will search all emails that contains the without consider the sensitive case. For each ? must have a parameter to corresponds like the %camise% 
 *         in: query
 *         required: false
-*         type: array
-*         collectionFormat: multi
+*         type: string
 *       - name: include
 *         description: array of attributes for include
 *         in: query
@@ -66,60 +65,83 @@ router.route('/products')
         %th%
         */
 
-        var pageVariables = objectSerializer.deserializeQueryPaginationIntoVariables(req)
-        var totalLength = 0
 
-        var queryDict = {
-            where: req.query.where
-        }
+
+        // var pageVariables = objectSerializer.deserializeQueryPaginationIntoVariables(req)
+        // var totalLength = 0
+
+        // var queryDict = {
+        //     where: req.query.where,
+        // }
         
-        if (pageVariables.limit != 0 || pageVariables.skip != 0) {
-            queryDict = {
-                offset: pageVariables.skip,
-                limit: pageVariables.limit,
-                where: req.query.where
-            }
-        }
+        // if (pageVariables.limit != 0 || pageVariables.skip != 0) {
+        //     queryDict = {
+        //         offset: pageVariables.skip,
+        //         limit: pageVariables.limit,
+        //         where: req.query.where
+        //     }
+        // }
 
-        if (req.query.include != undefined) {
+        // if (req.query.include != undefined) {
+        //     if (Object.prototype.toString.call(req.query.include) === '[object Array]') {
+        //         queryDict = {
+        //             attributes: req.query.include
+        //         }
+        //     } else if (typeof req.query.include === "string" || req.query.include instanceof String) {
+        //         queryDict = {
+        //             attributes: [req.query.include]
+        //         }
+        //     }
+        // }
 
-            if (Object.prototype.toString.call(req.query.include) === '[object Array]') {
-                queryDict = {
-                    attributes: req.query.include
-                }
-            } else if (typeof req.query.include === "string" || req.query.include instanceof String) {
-                queryDict = {
-                    attributes: [req.query.include]
-                }
-            }
-        }
+        // if (req.query.order != undefined) {
 
-        if (req.query.order != undefined) {
-
-            var orderOptionsArray = []
-            if (Object.prototype.toString.call(req.query.order) === '[object Array]') {
-                for (i = 0, len = req.query.order.length; i < len; i++) {
-                    orderOptionsArray[i] = req.query.order[i].split(" ")
-                }
-            } else if (typeof req.query.order === "string" || req.query.order instanceof String) {
-                orderOptionsArray = [req.query.order.split(" ")]
-            }
-            queryDict = {
-                order: orderOptionsArray
-            }
-        }
+        //     var orderOptionsArray = []
+        //     if (Object.prototype.toString.call(req.query.order) === '[object Array]') {
+        //         for (i = 0, len = req.query.order.length; i < len; i++) {
+        //             orderOptionsArray[i] = req.query.order[i].split(" ")
+        //         }
+        //     } else if (typeof req.query.order === "string" || req.query.order instanceof String) {
+        //         orderOptionsArray = [req.query.order.split(" ")]
+        //     }
+        //     queryDict = {
+        //         order: orderOptionsArray
+        //     }
+        // }
 
 
-        return models.Product.findAndCountAll(queryDict).then(function (result) {
 
-            var serialized = objectSerializer.serializeObjectIntoJSONAPI(result.rows, result.count, pageVariables.limit)
-            return res.json(serialized)
 
+        var query = 'SELECT * FROM "public"."Products"'
+
+         if (req.query.where != undefined) { 
+
+             query += ' WHERE '
+             query += req.query.where
+         }
+        
+        models.sequelize.query(query, { type: models.sequelize.QueryTypes.SELECT})
+        .then(function(result) {
+
+            // var serialized = objectSerializer.serializeObjectIntoJSONAPI(result, 1, 1)
+            return res.json(result)
+            // We don't need spread here, since only the results will be returned for select queries
         }).catch(function (err) {
 
             var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
             return res.status(403).json(error)
         })
+
+    //     return models.Product.findAndCountAll().then(function (result) {
+
+    //         var serialized = objectSerializer.serializeObjectIntoJSONAPI(result.rows, result.count, pageVariables.limit)
+    //         return res.json(serialized)
+
+    //     }).catch(function (err) {
+
+    //         var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
+    //         return res.status(403).json(error)
+    //     })
     })
 
     /**
