@@ -30,12 +30,11 @@ var models = require('../models/index');
 *         in: query
 *         required: false
 *         type: string
-*       - name: include
-*         description: array of attributes for include
+*       - name: includedAttributes
+*         description: attributes to include in the response, separated by query
 *         in: query
 *         required: false
-*         type: array
-*         collectionFormat: multi
+*         type: string
 *       - name: order
 *         description: string query of order separated by comma. Example___ NAME ASC, ID ASC
 *         in: query
@@ -62,37 +61,15 @@ router.route('/products')
         %th%
         */    
 
-        // if (req.query.include != undefined) {
-        //     if (Object.prototype.toString.call(req.query.include) === '[object Array]') {
-        //         queryDict = {
-        //             attributes: req.query.include
-        //         }
-        //     } else if (typeof req.query.include === "string" || req.query.include instanceof String) {
-        //         queryDict = {
-        //             attributes: [req.query.include]
-        //         }
-        //     }
-        // }
+        var query = 'SELECT (SELECT COUNT(*) AS count FROM "public"."Products") AS count, '
 
-        // if (req.query.order != undefined) {
+        if (req.query.includedAttributes == undefined) {
+            query += '*'
+        } else {
+            query += req.query.includedAttributes + ', id'
+        }
 
-        //     var orderOptionsArray = []
-        //     if (Object.prototype.toString.call(req.query.order) === '[object Array]') {
-        //         for (i = 0, len = req.query.order.length; i < len; i++) {
-        //             orderOptionsArray[i] = req.query.order[i].split(" ")
-        //         }
-        //     } else if (typeof req.query.order === "string" || req.query.order instanceof String) {
-        //         orderOptionsArray = [req.query.order.split(" ")]
-        //     }
-        //     queryDict = {
-        //         order: orderOptionsArray
-        //     }
-        // }
-
-
-
-
-        var query = 'SELECT (SELECT COUNT(*) AS count FROM "public"."Products") AS count, * FROM "public"."Products"'
+        query += ' FROM "public"."Products"'
 
          if (req.query.where != undefined) { 
 
@@ -105,9 +82,7 @@ router.route('/products')
              query += ' ORDER BY '
              query += req.query.order
          }
-         
-         
-
+                  
         var pageVariables = objectSerializer.deserializeQueryPaginationIntoVariables(req)
 
          if (pageVariables.limit != 0) {
