@@ -1,11 +1,10 @@
 var express = require('express')
 var router = express.Router()
-var Environment = require('../../../config/environment')
-var Jwt = require('jsonwebtoken')
-var Mailer = require('../../../lib/mailer')
-var errorHelper = require('../../../lib/error-handler')
 var objectSerializer = require('../../../lib/object-serializer')
 var models = require('../models/index');
+
+var ModelController = require('../../../lib/model-controller')
+var modelController = new ModelController(models.Product);
 
 /**
  * @swagger
@@ -53,74 +52,9 @@ var models = require('../models/index');
  */
 router.route('/products')
 
-    .get(function (req, res) {
-
-        /* query param format
-        email iLike ? OR email iLike ?,
-        %smad%, 
-        %th%
-        */    
-
-        var query = 'SELECT (SELECT COUNT(*) AS count FROM "public"."Products") AS count, '
-
-        if (req.query.includedAttributes == undefined) {
-            query += '*'
-        } else {
-            query += req.query.includedAttributes + ', id'
-        }
-
-        query += ' FROM "public"."Products"'
-
-         if (req.query.where != undefined) { 
-
-             query += ' WHERE '
-             query += req.query.where
-         }
-        
-         if (req.query.order != undefined) { 
-
-             query += ' ORDER BY '
-             query += req.query.order
-         }
-                  
-        var pageVariables = objectSerializer.deserializeQueryPaginationIntoVariables(req)
-
-         if (pageVariables.limit != 0) {
-             query += ' LIMIT ' + pageVariables.limit 
-         }
-
-          if (pageVariables.skip != 0) {
-             query += ' OFFSET ' + pageVariables.skip 
-         }
-         
-        models.sequelize.query(query, { type: models.sequelize.QueryTypes.SELECT})
-        .then(function(result) {
-
-            var count = 0
-            if (result[0] != null) {
-                count = result[0].count
-            }
-
-            var serialized = objectSerializer.serializeObjectIntoJSONAPI(result, count,  pageVariables,'Product')
-            return res.status(200).json(serialized)
-
-        }).catch(function (err) {
-
-            var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
-            return res.status(403).json(error)
-        })
-
-    //     return models.Product.findAndCountAll().then(function (result) {
-
-    //         var serialized = objectSerializer.serializeObjectIntoJSONAPI(result.rows, result.count, pageVariables.limit)
-    //         return res.json(serialized)
-
-    //     }).catch(function (err) {
-
-    //         var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
-    //         return res.status(403).json(error)
-    //     })
-    })
+    .get(function (req, res) {       
+        modelController.searchObjects(req,res)
+    })    
 
     /**
      * @swagger
