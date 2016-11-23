@@ -26,7 +26,7 @@ var models = require('../models/index');
 *         required: false
 *         type: integer
 *       - name: where
-*         description: regex for sequelize example _ name iLike ? OR description iLike ? \n %camise% \n %vermelha% , each line represents a item in array. iLike %camise%  means that will search all emails that contains the without consider the sensitive case. For each ? must have a parameter to corresponds like the %camise% 
+*         description: string regex for where query. Example___ name iLike '%camise%' OR description iLike  '%camise%' AND price < 10 OR name = Product
 *         in: query
 *         required: false
 *         type: string
@@ -37,13 +37,10 @@ var models = require('../models/index');
 *         type: array
 *         collectionFormat: multi
 *       - name: order
-*         description: array of attributes for include
+*         description: string query of order separated by comma. Example___ NAME ASC, ID ASC
 *         in: query
 *         required: false
-*         type: array
-*         collectionFormat: multi
-*         items:
-*           type: object
+*         type: string
 *       - name: x-access-token
 *         description: access token user
 *         in: header
@@ -63,15 +60,7 @@ router.route('/products')
         email iLike ? OR email iLike ?,
         %smad%, 
         %th%
-        */
-        
-        // if (pageVariables.limit != 0 || pageVariables.skip != 0) {
-        //     queryDict = {
-        //         offset: pageVariables.skip,
-        //         limit: pageVariables.limit,
-        //         where: req.query.where
-        //     }
-        // }
+        */    
 
         // if (req.query.include != undefined) {
         //     if (Object.prototype.toString.call(req.query.include) === '[object Array]') {
@@ -111,6 +100,14 @@ router.route('/products')
              query += req.query.where
          }
         
+         if (req.query.order != undefined) { 
+
+             query += ' ORDER BY '
+             query += req.query.order
+         }
+         
+         
+
         var pageVariables = objectSerializer.deserializeQueryPaginationIntoVariables(req)
 
          if (pageVariables.limit != 0) {
@@ -131,7 +128,7 @@ router.route('/products')
 
             var serialized = objectSerializer.serializeObjectIntoJSONAPI(result, count,  pageVariables,'Product')
             return res.status(200).json(serialized)
-            // We don't need spread here, since only the results will be returned for select queries
+
         }).catch(function (err) {
 
             var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
