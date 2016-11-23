@@ -64,10 +64,6 @@ router.route('/products')
         %smad%, 
         %th%
         */
-
-
-
-        var pageVariables = objectSerializer.deserializeQueryPaginationIntoVariables(req)
         
         // if (pageVariables.limit != 0 || pageVariables.skip != 0) {
         //     queryDict = {
@@ -107,7 +103,7 @@ router.route('/products')
 
 
 
-        var query = 'SELECT * FROM "public"."Products"'
+        var query = 'SELECT (SELECT COUNT(*) AS count FROM "public"."Products") AS count, * FROM "public"."Products"'
 
          if (req.query.where != undefined) { 
 
@@ -115,10 +111,25 @@ router.route('/products')
              query += req.query.where
          }
         
+        var pageVariables = objectSerializer.deserializeQueryPaginationIntoVariables(req)
+
+         if (pageVariables.limit != 0) {
+             query += ' LIMIT ' + pageVariables.limit 
+         }
+
+          if (pageVariables.skip != 0) {
+             query += ' OFFSET ' + pageVariables.skip 
+         }
+         
         models.sequelize.query(query, { type: models.sequelize.QueryTypes.SELECT})
         .then(function(result) {
 
-            var serialized = objectSerializer.serializeObjectIntoJSONAPI(result, result.length,  pageVariables.limit,'Product')
+            var count = 0
+            if (result[0] != null) {
+                count = result[0].count
+            }
+
+            var serialized = objectSerializer.serializeObjectIntoJSONAPI(result, count,  pageVariables,'Product')
             return res.status(200).json(serialized)
             // We don't need spread here, since only the results will be returned for select queries
         }).catch(function (err) {
