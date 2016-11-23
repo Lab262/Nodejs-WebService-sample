@@ -52,9 +52,9 @@ var modelController = new ModelController(models.Product);
  */
 router.route('/products')
 
-    .get(function (req, res) {       
-        modelController.searchObjects(req,res)
-    })    
+    .get(function (req, res) {
+        modelController.searchObjects(req, res)
+    })
 
     /**
      * @swagger
@@ -221,20 +221,9 @@ router.route('/products/:id')
      *         description: Product not found.
      */
     .get(function (req, res) {
-
-        models.Product.findOne({ where: { id: req.params.id } }).then(function (product) {
-
-            if (product) {
-                var serialized = objectSerializer.serializeObjectIntoJSONAPI(product)
-                return res.json(serialized)
-            } else {
-                return res.status(404).json("PRODUCT NOT FOUND")
-            }
-        }).catch(function (err) {
-            var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
-            return res.status(404).json(error)
-        })
+       modelController.searchOneWithId(req,res)
     })
+
 
     /**
      * @swagger
@@ -261,23 +250,7 @@ router.route('/products/:id')
      *         description: Product not found.
      */
     .delete(function (req, res) {
-
-        models.Product.destroy({
-            where: {
-                id: req.params.id
-            }
-        }).then(function (result) {
-
-            if (result == 0) {
-                var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify("Product not found."))
-                return res.status(404).json(error)
-            } else {
-                return res.status(200).json("Product successfully deleted")
-            }
-        }).catch(function (err) {
-            var error = objectSerializer.serializeSimpleErrorIntoJSONAPI(JSON.stringify(err))
-            return res.status(404).json(error)
-        })
+        modelController.destroyOneWithId(req,res)
     })
 
 module.exports = router
