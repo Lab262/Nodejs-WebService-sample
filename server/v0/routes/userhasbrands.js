@@ -3,15 +3,15 @@ var router = express.Router()
 var models = require('../models/index');
 
 var ModelController = require('../../../lib/model-controller')
-var modelController = new ModelController(models.Brand);
+var modelController = new ModelController(models.UserHasBrand);
 
 /**
  * @swagger
- * /api/v0/brands:
+ * /api/v0/userhasbrands:
  *   get:
  *     tags:
- *       - Brands
- *     description: get all brands
+ *       - UserHasBrands
+ *     description: get all userhasbrands
  *     parameters:
 *       - name: page
 *         description: number of pages
@@ -36,49 +36,39 @@ var modelController = new ModelController(models.Brand);
 *         type: string
  *     responses:
  *       200:
- *         description: all brands.
+ *         description: all userhasbrands wish products by query.
  *       404:
- *         description: User not authorized.
+ *         description: UserHasBrand not authorized.
  */
-router.route('/brands')
+router.route('/userhasbrands')
 
     .get(function (req, res) {
-               modelController.searchObjects(req, res)
-        })
+        modelController.searchObjects(req, res)
+    })
 
     /**
      * @swagger
-     * /api/v0/brands:
+     * /api/v0/userhasbrands:
      *   post:
      *     tags:
-     *       - Brands
-     *     description: Create new brand
+     *       - UserHasBrands
+     *     description: Create new userhasbrand
      *     parameters:
-    *       - name: name
-    *         description: name brand
+    *       - name: BrandId
+    *         description: the BrandId 
     *         in: formData
     *         required: true
-    *         type: string
-    *       - name: description
-    *         description: description of brand
+    *         type: integer
+    *       - name: UserId 
+    *         description: the user id 
     *         in: formData
     *         required: true
-    *         type: string
-    *       - name: discount
-    *         description: discount of brand, decimal separated by point "."
-    *         in: formData
-    *         required: false
-    *         type: number
-    *       - name: brandPhone
-    *         description: brand of phone
+    *         type: integer
+    *       - name: userAccessLevel 
+    *         description: the user access level. 0..brandAdmin 
     *         in: formData
     *         required: true
-    *         type: string
-    *       - name: email
-    *         description: email of brand
-    *         in: formData
-    *         required: true
-    *         type: string
+    *         type: integer
     *       - name: x-access-token
     *         description: access token user
     *         in: header
@@ -86,82 +76,69 @@ router.route('/brands')
     *         type: string
      *     responses:
      *       200:
-     *         description: brand object
+     *         description: userhasbrand
      *       403:
      *         description: invalid paramer
      */
     .post(function (req, res) {
-               modelController.createModel(req,res)
+        modelController.createModel(req, res)
     })
+
+
+router.route('/userwishproducts/:id')
+
 
 /**
   * @swagger
-  * /api/v0/brands/{id}:
+  * /api/v0/userhasbrands/{id}:
   *   patch:
   *     tags:
-  *       - Brands
-  *     description: get brand and update by id
+  *       - UserHasBrands
+  *     description: get user userhasbrands and update by id
   *     parameters:
- *       - name: id
- *         description: brand valid id
- *         in: path
+ *       - name: BrandId
+ *         description: the BrandId 
+ *         in: formData
  *         required: true
- *         type: string
+ *         type: integer
+ *       - name: UserId 
+ *         description: the user id 
+ *         in: formData
+ *         required: true
+ *         type: integer
+ *       - name: userAccessLevel 
+ *         description: the user access level. 0..brandAdmin 
+ *         in: formData
+ *         required: true
+ *         type: integer
  *       - name: x-access-token
  *         description: access token user
  *         in: header
  *         required: true
  *         type: string
- *       - name: name
- *         description: name brand
- *         in: formData
- *         required: false
- *         type: string
- *       - name: description
- *         description: description brand
- *         in: formData
- *         required: false
- *         type: string
- *       - name: brandPhone
- *         description: brand phone
- *         in: formData
- *         required: false
- *         type: string
- *       - name: discount
- *         description: brand discount
- *         in: formData
- *         required: false
- *         type: number
- *       - name: email
- *         description: brand email
- *         in: formData
- *         required: false
- *         type: string
   *     responses:
   *       200:
-  *         description: Brand successfully updated.
+  *         description: userhasbrands successfully updated.
   *       404:
-  *         description: Brand not found.
+  *         description: userhasbrands not found.
   */
-router.route('/brands/:id')
-
     .patch(function (req, res) {
-               modelController.updateModel(req,res);
+        modelController.updateModel(req, res);
     })
 
     /**
      * @swagger
-     * /api/v0/brands/{id}:
+     * /api/v0/userhasbrands/{id}:
      *   get:
      *     tags:
-     *       - Brands
-     *     description: get brand by id
+     *       - UserHasBrands
+     *     description: get userhasbrand by id
      *     parameters:
     *       - name: id
-    *         description: brand valid id
+    *         description: userhasbrand valid id
     *         in: path
     *         required: true
-    *         type: string
+    *         type: integer
     *       - name: x-access-token
     *         description: access token user
     *         in: header
@@ -169,24 +146,24 @@ router.route('/brands/:id')
     *         type: string
      *     responses:
      *       200:
-     *         description: Brand informations.
+     *         description: userhasbrand informations.
      *       404:
-     *         description: Brand not found.
+     *         description: userhasbrand not found.
      */
     .get(function (req, res) {
-       modelController.searchOneWithId(req,res)
+        modelController.searchOneWithId(req, res)
     })
 
     /**
      * @swagger
-     * /api/v0/brands/{id}:
+     * /api/v0/userhasbrands/{id}:
      *   delete:
      *     tags:
-     *       - Brands
-     *     description: delete brand by id
+     *       - UserHasBrands
+     *     description: delete userhasbrand  by id
      *     parameters:
     *       - name: id
-    *         description: brand valid id
+    *         description: userhasbrand  valid id
     *         in: path
     *         required: true
     *         type: string
@@ -197,12 +174,12 @@ router.route('/brands/:id')
     *         type: string
      *     responses:
      *       200:
-     *         description: Brand successfully deleted.
+     *         description: userhasbrand  successfully deleted.
      *       404:
-     *         description: Brand not found.
+     *         description: userhasbrand  not found.
      */
     .delete(function (req, res) {
-        modelController.destroyOneWithId(req,res)
+        modelController.destroyOneWithId(req, res)
     })
 
 module.exports = router

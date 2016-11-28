@@ -4,12 +4,13 @@ module.exports = function(sequelize, DataTypes) {
     name: DataTypes.STRING,
     description: DataTypes.STRING,
     discount: DataTypes.FLOAT,
-    brandPhone: DataTypes.INTEGER,
+    brandPhone: DataTypes.STRING,
     email: DataTypes.STRING
   }, {
     classMethods: {
       associate: function(models) {
         Brand.hasMany(models.Product);
+        Brand.belongsToMany(models.User, {through: 'UserHasBrand'})     
       }
     }
   });

@@ -10,12 +10,12 @@ module.exports = function (sequelize, DataTypes) {
     gender: DataTypes.INTEGER,
     accessLevel: DataTypes.INTEGER,
     name: DataTypes.STRING
-    
   },{
       classMethods: {
         associate: function (models) {
           User.hasMany(models.SocialMedia);
-          User.belongsToMany(models.Product, {through: 'UserWishProduct'});      
+          User.belongsToMany(models.Product, {through: 'UserWishProduct'});
+          User.belongsToMany(models.Brand, {through: 'UserHasBrand'})     
         }
       },
       instanceMethods: {
