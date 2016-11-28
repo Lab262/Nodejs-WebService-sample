@@ -223,6 +223,11 @@ router.route('/auth/forgotPasswordConfirmed/:token')
 *         in: formData
 *         required: true
 *         type: string
+*       - name: name
+*         description: the user name.
+*         in: formData
+*         required: true
+*         type: string
 *       - name: socialMediaType
 *         description: social media type options are 0 = Facebook, 1 = Instagram, 2 = Gmail, 3 = Twitter.
 *         in: formData
@@ -256,6 +261,7 @@ router.route('/auth/socialMedia')
         return models.User.create({
           email: req.body.email,
           password: req.body.password,
+          name: req.body.name,
           isEmailVerified: true,
           SocialMedia: [{
             socialMediaPassword: req.body.password,
